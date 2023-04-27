@@ -18,5 +18,9 @@ namespace HueFestivalTicket.Models
         [DefaultValue(true)]
         public bool IsActive { get; set; }
         public DateTime TimeJoined { get; set; }
+        public int IdRole { get; set; }
+
+        [ForeignKey("IdRole")]
+        public Role? Role { get; set; }
     }
 }

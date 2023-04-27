@@ -13,17 +13,17 @@ namespace HueFestivalTicket.Models
         [Required]
         public string? QRCode { get; set; }
         public Decimal Price { get; set; }
+        public int IdEventLocation { get; set; }
+        public int IdCustomer { get; set;}
+        public int IdTypeTicket { get; set; }
 
         [ForeignKey("IdEventLocation")]
-        public int IdEventLocation { get; set; }
         public EventLocation? EventLocation { get; set; }
 
         [ForeignKey("IdCustomer")]
-        public int IdCustomer { get; set;}
         public Customer? Customer { get; set;}
 
         [ForeignKey("IdTypeTicket")]
-        public int IdTypeTicket { get; set; }
         public TypeTicket? TypeTicket { get; set; }
     }
 }

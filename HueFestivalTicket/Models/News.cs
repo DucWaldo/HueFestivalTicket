@@ -14,9 +14,9 @@ namespace HueFestivalTicket.Models
         public string? Content { get; set; }
         public DateTime TimeCreate { get; set; }
         public string? ImageUrl { get; set; }
+        public int IdAccount { get; set; }
 
         [ForeignKey("IdAccount")]
-        public int IdAccount { get; set; }
         public Account? Account { get; set; }
     }
 }

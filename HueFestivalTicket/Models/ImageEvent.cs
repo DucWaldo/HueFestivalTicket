@@ -10,9 +10,9 @@ namespace HueFestivalTicket.Models
         public int IdImageEvent { get; set; }
         [Required]
         public string? ImageUrl { get; set; }
+        public int IdEvent { get; set; }
 
         [ForeignKey("IdEvent")]
-        public int IdEvent { get; set; }
         public Event? Event { get; set; }
     }
 }

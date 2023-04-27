@@ -10,13 +10,13 @@ namespace HueFestivalTicket.Models
         public int IdCheckin { get; set; }
         public DateTime TimeCheckin { get; set; }
         public bool Status { get; set; }
+        public int IdAccount { get; set; }
+        public int IdTicket { get; set; }
 
         [ForeignKey("IdAccount")]
-        public int IdAccount { get; set; }
         public Account? Account { get; set; }
 
         [ForeignKey("IdTicket")]
-        public int IdTicket { get; set; }
         public Ticket? Ticket { get; set; }
     }
 }

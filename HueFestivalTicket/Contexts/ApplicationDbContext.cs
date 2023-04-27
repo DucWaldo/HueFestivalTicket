@@ -1,7 +1,7 @@
 ﻿using HueFestivalTicket.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace HueFestivalTicket.Context
+namespace HueFestivalTicket.Contexts
 {
     public class ApplicationDbContext : DbContext
     {
@@ -9,7 +9,7 @@ namespace HueFestivalTicket.Context
 
         #region DbSet
         public DbSet<Account> Accounts { get; set; }
-        public DbSet<AccountRole> AccountRoles { get; set; }
+        //public DbSet<AccountRole> AccountRoles { get; set; }
         public DbSet<Checkin> Checkins { get; set; }
         public DbSet<Customer> Customers { get; set; }
         public DbSet<Event> Events { get; set; }

@@ -13,9 +13,9 @@ namespace HueFestivalTicket.Models
         public string? Decription { get; set; }
         public string? Address { get; set; }
         public string? ImageUrl { get; set; }
+        public int IdTypeLocation { get; set; }
 
         [ForeignKey("IdTypeLocation")]
-        public int IdTypeLocation { get; set; }
         public TypeLocation? TypeLocation { get; set; }
     }
 }

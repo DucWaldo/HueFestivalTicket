@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HueFestivalTicket.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20230427031134_InitDatabase")]
-    partial class InitDatabase
+    [Migration("20230427070015_DeleteAccountRoleAndFixSame")]
+    partial class DeleteAccountRoleAndFixSame
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -33,6 +33,9 @@ namespace HueFestivalTicket.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdAccount"));
 
+                    b.Property<int>("IdRole")
+                        .HasColumnType("int");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
@@ -50,36 +53,9 @@ namespace HueFestivalTicket.Migrations
 
                     b.HasKey("IdAccount");
 
+                    b.HasIndex("IdRole");
+
                     b.ToTable("Account");
-                });
-
-            modelBuilder.Entity("HueFestivalTicket.Models.AccountRole", b =>
-                {
-                    b.Property<int>("IdAccountRole")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdAccountRole"));
-
-                    b.Property<int?>("AccountIdAccount")
-                        .HasColumnType("int");
-
-                    b.Property<int>("IdAccount")
-                        .HasColumnType("int");
-
-                    b.Property<int>("IdRole")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("RoleIdRole")
-                        .HasColumnType("int");
-
-                    b.HasKey("IdAccountRole");
-
-                    b.HasIndex("AccountIdAccount");
-
-                    b.HasIndex("RoleIdRole");
-
-                    b.ToTable("AccountRole");
                 });
 
             modelBuilder.Entity("HueFestivalTicket.Models.Checkin", b =>
@@ -90,9 +66,6 @@ namespace HueFestivalTicket.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdCheckin"));
 
-                    b.Property<int?>("AccountIdAccount")
-                        .HasColumnType("int");
-
                     b.Property<int>("IdAccount")
                         .HasColumnType("int");
 
@@ -102,17 +75,14 @@ namespace HueFestivalTicket.Migrations
                     b.Property<bool>("Status")
                         .HasColumnType("bit");
 
-                    b.Property<int?>("TicketIdTicket")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("TimeCheckin")
                         .HasColumnType("datetime2");
 
                     b.HasKey("IdCheckin");
 
-                    b.HasIndex("AccountIdAccount");
+                    b.HasIndex("IdAccount");
 
-                    b.HasIndex("TicketIdTicket");
+                    b.HasIndex("IdTicket");
 
                     b.ToTable("Checkin");
                 });
@@ -191,16 +161,10 @@ namespace HueFestivalTicket.Migrations
                     b.Property<DateTime>("DateStart")
                         .HasColumnType("datetime2");
 
-                    b.Property<int?>("EventIdEvent")
-                        .HasColumnType("int");
-
                     b.Property<int>("IdEvent")
                         .HasColumnType("int");
 
                     b.Property<int>("IdLocation")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("LocationIdLocation")
                         .HasColumnType("int");
 
                     b.Property<int>("NumberSlot")
@@ -214,9 +178,9 @@ namespace HueFestivalTicket.Migrations
 
                     b.HasKey("IdEventLocation");
 
-                    b.HasIndex("EventIdEvent");
+                    b.HasIndex("IdEvent");
 
-                    b.HasIndex("LocationIdLocation");
+                    b.HasIndex("IdLocation");
 
                     b.ToTable("EventLocation");
                 });
@@ -229,9 +193,6 @@ namespace HueFestivalTicket.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdImageEvent"));
 
-                    b.Property<int?>("EventIdEvent")
-                        .HasColumnType("int");
-
                     b.Property<int>("IdEvent")
                         .HasColumnType("int");
 
@@ -241,7 +202,7 @@ namespace HueFestivalTicket.Migrations
 
                     b.HasKey("IdImageEvent");
 
-                    b.HasIndex("EventIdEvent");
+                    b.HasIndex("IdEvent");
 
                     b.ToTable("ImageEvent");
                 });
@@ -270,12 +231,9 @@ namespace HueFestivalTicket.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("TypeLocationIdTypeLocation")
-                        .HasColumnType("int");
-
                     b.HasKey("IdLocation");
 
-                    b.HasIndex("TypeLocationIdTypeLocation");
+                    b.HasIndex("IdTypeLocation");
 
                     b.ToTable("Location");
                 });
@@ -287,9 +245,6 @@ namespace HueFestivalTicket.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdNews"));
-
-                    b.Property<int?>("AccountIdAccount")
-                        .HasColumnType("int");
 
                     b.Property<string>("Content")
                         .HasColumnType("nvarchar(max)");
@@ -310,7 +265,7 @@ namespace HueFestivalTicket.Migrations
 
                     b.HasKey("IdNews");
 
-                    b.HasIndex("AccountIdAccount");
+                    b.HasIndex("IdAccount");
 
                     b.ToTable("News");
                 });
@@ -323,9 +278,6 @@ namespace HueFestivalTicket.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdPriceTicket"));
 
-                    b.Property<int?>("EventLocationIdEventLocation")
-                        .HasColumnType("int");
-
                     b.Property<int>("IdEventLocation")
                         .HasColumnType("int");
 
@@ -335,14 +287,11 @@ namespace HueFestivalTicket.Migrations
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<int?>("TypeTicketIdTypeTicket")
-                        .HasColumnType("int");
-
                     b.HasKey("IdPriceTicket");
 
-                    b.HasIndex("EventLocationIdEventLocation");
+                    b.HasIndex("IdEventLocation");
 
-                    b.HasIndex("TypeTicketIdTypeTicket");
+                    b.HasIndex("IdTypeTicket");
 
                     b.ToTable("PriceTicket");
                 });
@@ -395,12 +344,6 @@ namespace HueFestivalTicket.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdTicket"));
 
-                    b.Property<int?>("CustomerIdCustomer")
-                        .HasColumnType("int");
-
-                    b.Property<int?>("EventLocationIdEventLocation")
-                        .HasColumnType("int");
-
                     b.Property<int>("IdCustomer")
                         .HasColumnType("int");
 
@@ -421,16 +364,13 @@ namespace HueFestivalTicket.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("TypeTicketIdTypeTicket")
-                        .HasColumnType("int");
-
                     b.HasKey("IdTicket");
 
-                    b.HasIndex("CustomerIdCustomer");
+                    b.HasIndex("IdCustomer");
 
-                    b.HasIndex("EventLocationIdEventLocation");
+                    b.HasIndex("IdEventLocation");
 
-                    b.HasIndex("TypeTicketIdTypeTicket");
+                    b.HasIndex("IdTypeTicket");
 
                     b.ToTable("Ticket");
                 });
@@ -481,9 +421,6 @@ namespace HueFestivalTicket.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdUser"));
 
-                    b.Property<int?>("AccountIdAccount")
-                        .HasColumnType("int");
-
                     b.Property<string>("Email")
                         .HasColumnType("nvarchar(max)");
 
@@ -509,22 +446,18 @@ namespace HueFestivalTicket.Migrations
 
                     b.HasKey("IdUser");
 
-                    b.HasIndex("AccountIdAccount");
+                    b.HasIndex("IdAccount");
 
                     b.ToTable("User");
                 });
 
-            modelBuilder.Entity("HueFestivalTicket.Models.AccountRole", b =>
+            modelBuilder.Entity("HueFestivalTicket.Models.Account", b =>
                 {
-                    b.HasOne("HueFestivalTicket.Models.Account", "Account")
-                        .WithMany()
-                        .HasForeignKey("AccountIdAccount");
-
                     b.HasOne("HueFestivalTicket.Models.Role", "Role")
                         .WithMany()
-                        .HasForeignKey("RoleIdRole");
-
-                    b.Navigation("Account");
+                        .HasForeignKey("IdRole")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Role");
                 });
@@ -533,11 +466,15 @@ namespace HueFestivalTicket.Migrations
                 {
                     b.HasOne("HueFestivalTicket.Models.Account", "Account")
                         .WithMany()
-                        .HasForeignKey("AccountIdAccount");
+                        .HasForeignKey("IdAccount")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("HueFestivalTicket.Models.Ticket", "Ticket")
                         .WithMany()
-                        .HasForeignKey("TicketIdTicket");
+                        .HasForeignKey("IdTicket")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Account");
 
@@ -548,11 +485,15 @@ namespace HueFestivalTicket.Migrations
                 {
                     b.HasOne("HueFestivalTicket.Models.Event", "Event")
                         .WithMany()
-                        .HasForeignKey("EventIdEvent");
+                        .HasForeignKey("IdEvent")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("HueFestivalTicket.Models.Location", "Location")
                         .WithMany()
-                        .HasForeignKey("LocationIdLocation");
+                        .HasForeignKey("IdLocation")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Event");
 
@@ -563,7 +504,9 @@ namespace HueFestivalTicket.Migrations
                 {
                     b.HasOne("HueFestivalTicket.Models.Event", "Event")
                         .WithMany()
-                        .HasForeignKey("EventIdEvent");
+                        .HasForeignKey("IdEvent")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Event");
                 });
@@ -572,7 +515,9 @@ namespace HueFestivalTicket.Migrations
                 {
                     b.HasOne("HueFestivalTicket.Models.TypeLocation", "TypeLocation")
                         .WithMany()
-                        .HasForeignKey("TypeLocationIdTypeLocation");
+                        .HasForeignKey("IdTypeLocation")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("TypeLocation");
                 });
@@ -581,7 +526,9 @@ namespace HueFestivalTicket.Migrations
                 {
                     b.HasOne("HueFestivalTicket.Models.Account", "Account")
                         .WithMany()
-                        .HasForeignKey("AccountIdAccount");
+                        .HasForeignKey("IdAccount")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Account");
                 });
@@ -590,11 +537,15 @@ namespace HueFestivalTicket.Migrations
                 {
                     b.HasOne("HueFestivalTicket.Models.EventLocation", "EventLocation")
                         .WithMany()
-                        .HasForeignKey("EventLocationIdEventLocation");
+                        .HasForeignKey("IdEventLocation")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("HueFestivalTicket.Models.TypeTicket", "TypeTicket")
                         .WithMany()
-                        .HasForeignKey("TypeTicketIdTypeTicket");
+                        .HasForeignKey("IdTypeTicket")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("EventLocation");
 
@@ -605,15 +556,21 @@ namespace HueFestivalTicket.Migrations
                 {
                     b.HasOne("HueFestivalTicket.Models.Customer", "Customer")
                         .WithMany()
-                        .HasForeignKey("CustomerIdCustomer");
+                        .HasForeignKey("IdCustomer")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("HueFestivalTicket.Models.EventLocation", "EventLocation")
                         .WithMany()
-                        .HasForeignKey("EventLocationIdEventLocation");
+                        .HasForeignKey("IdEventLocation")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("HueFestivalTicket.Models.TypeTicket", "TypeTicket")
                         .WithMany()
-                        .HasForeignKey("TypeTicketIdTypeTicket");
+                        .HasForeignKey("IdTypeTicket")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Customer");
 
@@ -626,7 +583,9 @@ namespace HueFestivalTicket.Migrations
                 {
                     b.HasOne("HueFestivalTicket.Models.Account", "Account")
                         .WithMany()
-                        .HasForeignKey("AccountIdAccount");
+                        .HasForeignKey("IdAccount")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Account");
                 });

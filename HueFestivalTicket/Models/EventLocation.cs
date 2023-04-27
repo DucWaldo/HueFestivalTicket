@@ -13,13 +13,13 @@ namespace HueFestivalTicket.Models
         public DateTime Time { get; set; }
         public int NumberSlot { get; set; }
         public decimal Price { get; set; }
+        public int IdEvent { get; set; }
+        public int IdLocation { get; set; }
 
         [ForeignKey("IdEvent")]
-        public int IdEvent { get; set; }
         public Event? Event { get; set; }
 
         [ForeignKey("IdLocation")]
-        public int IdLocation { get; set; }
         public Location? Location { get; set; }
     }
 }

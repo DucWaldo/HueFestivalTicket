@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using HueFestivalTicket.Contexts;
 using HueFestivalTicket.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace HueFestivalTicket.Controllers
 {
@@ -22,6 +23,7 @@ namespace HueFestivalTicket.Controllers
         }
 
         // GET: api/Roles
+        [Authorize]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Role>>> GetRoles()
         {

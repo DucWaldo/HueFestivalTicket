@@ -16,6 +16,8 @@ using System.Security.Claims;
 using System.IdentityModel.Tokens.Jwt;
 using HueFestivalTicket.Data;
 using System.Security.Cryptography;
+using NuGet.Common;
+using HueFestivalTicket.Middlewares;
 
 namespace HueFestivalTicket.Controllers
 {
@@ -132,56 +134,6 @@ namespace HueFestivalTicket.Controllers
             return (_context.Accounts?.Any(e => e.IdAccount == id)).GetValueOrDefault();
         }
 
-        // POST: api/Accounts/Login
-        [AllowAnonymous]
-        [HttpPost("Login")]
-        public async Task<IActionResult> Login([FromBody] AccountDTO account)
-        {
-            /*
-            var acc = await _context.Accounts.SingleOrDefaultAsync(x => x.Username == account.Username && x.Password == GetMD5Hash(account.Password));
-            var rolename = await _context.Roles.SingleOrDefaultAsync(x => x.IdRole == acc.IdRole);
-            if (acc == null)
-            {
-                return Unauthorized("Invalid email or password");
-            }
-            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
-            var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-
-            var claims = new[]
-            {
-                new Claim(ClaimTypes.NameIdentifier, acc.Username),
-                new Claim(ClaimTypes.Role, rolename.Name)
-            };
-
-            var token = new JwtSecurityToken(_configuration["Jwt:Issuer"], _configuration["Jwt:Audience"], claims, expires: DateTime.Now.AddMinutes(15), signingCredentials: credentials);
-            //string writeToken = new JwtSecurityTokenHandler().WriteToken(token);
-            return Ok(new JwtSecurityTokenHandler().WriteToken(token));
-            */
-            var acc = await _context.Accounts.SingleOrDefaultAsync(x => x.Username == account.Username && x.Password == GetMD5Hash(account.Password ?? ""));
-            var rolename = await _context.Roles.SingleOrDefaultAsync(x => x.IdRole == acc.IdRole);
-
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"] ?? "");
-
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(new Claim[]
-                {
-                    
-                    new Claim(ClaimTypes.NameIdentifier, acc.Username ?? ""),
-                    new Claim(ClaimTypes.Role, rolename.Name ?? "")
-                }),
-                Expires = DateTime.UtcNow.AddMinutes(1),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-            };
-
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            return Ok(new
-            {
-                token = tokenHandler.WriteToken(token)
-            });
-        }
-
         [HttpPost("Register")]
         public async Task<IActionResult> Register([FromBody] AccountDTO account)
         {
@@ -198,7 +150,7 @@ namespace HueFestivalTicket.Controllers
             var acc = new Account
             {
                 Username = account.Username,
-                Password = GetMD5Hash(account.Password ?? ""),
+                Password = Encrypt.GetMD5Hash(account.Password ?? ""),
                 IsActive = true,
                 TimeJoined = DateTime.Now,
                 IdRole = 1
@@ -208,22 +160,6 @@ namespace HueFestivalTicket.Controllers
             await _context.SaveChangesAsync();
 
             return Ok();
-        }
-
-        private string GetMD5Hash(string str)
-        {
-            using (var md5 = MD5.Create())
-            {
-                byte[] inputBytes = Encoding.ASCII.GetBytes(str);
-                byte[] hashBytes = md5.ComputeHash(inputBytes);
-
-                StringBuilder sb = new StringBuilder();
-                for (int i = 0; i < hashBytes.Length; i++)
-                {
-                    sb.Append(hashBytes[i].ToString("x2"));
-                }
-                return sb.ToString();
-            }
         }
 
         [Authorize]

@@ -9,7 +9,7 @@ namespace HueFestivalTicket.Contexts
 
         #region DbSet
         public DbSet<Account> Accounts { get; set; }
-        //public DbSet<AccountRole> AccountRoles { get; set; }
+        public DbSet<ManagerToken> ManagerTokens { get; set; }
         public DbSet<Checkin> Checkins { get; set; }
         public DbSet<Customer> Customers { get; set; }
         public DbSet<Event> Events { get; set; }

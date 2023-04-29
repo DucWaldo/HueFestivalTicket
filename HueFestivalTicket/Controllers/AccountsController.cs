@@ -66,7 +66,7 @@ namespace HueFestivalTicket.Controllers
         // PUT: api/Accounts/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutAccount(int id, Account account)
+        public async Task<IActionResult> PutAccount(Guid id, Account account)
         {
             if (id != account.IdAccount)
             {
@@ -111,7 +111,7 @@ namespace HueFestivalTicket.Controllers
 
         // DELETE: api/Accounts/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteAccount(int id)
+        public async Task<IActionResult> DeleteAccount(Guid id)
         {
             if (_context.Accounts == null)
             {
@@ -129,7 +129,7 @@ namespace HueFestivalTicket.Controllers
             return NoContent();
         }
 
-        private bool AccountExists(int id)
+        private bool AccountExists(Guid id)
         {
             return (_context.Accounts?.Any(e => e.IdAccount == id)).GetValueOrDefault();
         }
@@ -150,10 +150,10 @@ namespace HueFestivalTicket.Controllers
             var acc = new Account
             {
                 Username = account.Username,
-                Password = Encrypt.GetMD5Hash(account.Password ?? ""),
+                Password = Generate.GetMD5Hash(account.Password ?? ""),
                 IsActive = true,
                 TimeJoined = DateTime.Now,
-                IdRole = 1
+                IdRole = Guid.Parse("3fa85f64-5717-4562-b3fc-2c963f66afa6")
             };
 
             await _context.Accounts.AddAsync(acc);

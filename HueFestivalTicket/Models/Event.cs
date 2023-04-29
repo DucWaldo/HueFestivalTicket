@@ -8,7 +8,7 @@ namespace HueFestivalTicket.Models
     public class Event
     {
         [Key]
-        public int IdEvent { get; set; }
+        public Guid IdEvent { get; set; }
         [Required]
         [MaxLength(255)]
         public string? Name { get; set; }

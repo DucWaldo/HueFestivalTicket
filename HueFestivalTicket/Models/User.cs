@@ -20,7 +20,7 @@ namespace HueFestivalTicket.Models
         [EmailAddress(ErrorMessage = "Ivalid Email")]
         public string? Email { get; set; }
         public string? Organization { get; set; }
-        public int IdAccount { get; set; }
+        public Guid IdAccount { get; set; }
 
         [ForeignKey("IdAccount")]
         public Account? Account { get; set; }

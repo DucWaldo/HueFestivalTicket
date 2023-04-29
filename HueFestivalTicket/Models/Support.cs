@@ -7,11 +7,15 @@ namespace HueFestivalTicket.Models
     public class Support
     {
         [Key]
-        public int IdSuport { get; set; }
+        public Guid IdSuport { get; set; }
         [Required]
         [StringLength(255)]
         public string? Title { get; set; }
         [Required]
         public string? Content { get; set; }
+        public Guid IdAccount { get; set; }
+
+        [ForeignKey("IdAccount")]
+        public Account? Account { get; set; }
     }
 }

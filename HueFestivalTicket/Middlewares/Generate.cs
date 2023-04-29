@@ -3,7 +3,7 @@ using System.Text;
 
 namespace HueFestivalTicket.Middlewares
 {
-    public class Encrypt
+    public class Generate
     {
         public static string GetMD5Hash(string str)
         {
@@ -18,6 +18,16 @@ namespace HueFestivalTicket.Middlewares
                     sb.Append(hashBytes[i].ToString("x2"));
                 }
                 return sb.ToString();
+            }
+        }
+        
+        public static string GetRefreshToken()
+        {
+            var random = new byte[32];
+            using (var ran = RandomNumberGenerator.Create())
+            {
+                ran.GetBytes(random);
+                return Convert.ToBase64String(random);
             }
         }
     }

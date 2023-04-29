@@ -7,7 +7,7 @@ namespace HueFestivalTicket.Models
     public class TypeTicket
     {
         [Key]
-        public int IdTypeTicket { get; set; }
+        public Guid IdTypeTicket { get; set; }
         [Required]
         [StringLength(50)]
         public string? Name { get; set; }

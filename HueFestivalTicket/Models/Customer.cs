@@ -7,7 +7,7 @@ namespace HueFestivalTicket.Models
     public class Customer
     {
         [Key]
-        public int IdCustomer { get; set; }
+        public Guid IdCustomer { get; set; }
         [Required]
         [MaxLength(255)]
         public string? FirstName { get; set; }

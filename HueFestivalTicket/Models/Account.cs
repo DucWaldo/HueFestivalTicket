@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -9,7 +8,7 @@ namespace HueFestivalTicket.Models
     public class Account
     {
         [Key]
-        public int IdAccount { get; set; }
+        public  Guid IdAccount { get; set; }
         [Required]
         [MaxLength(255)]
         public string? Username { get; set; }
@@ -18,7 +17,7 @@ namespace HueFestivalTicket.Models
         [DefaultValue(true)]
         public bool IsActive { get; set; }
         public DateTime TimeJoined { get; set; }
-        public int IdRole { get; set; }
+        public Guid IdRole { get; set; }
 
         [ForeignKey("IdRole")]
         public Role? Role { get; set; }

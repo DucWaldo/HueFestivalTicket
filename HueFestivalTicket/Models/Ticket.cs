@@ -7,15 +7,15 @@ namespace HueFestivalTicket.Models
     public class Ticket
     {
         [Key]
-        public int IdTicket { get; set; }
+        public Guid IdTicket { get; set; }
         [Required]
         public string? TicketNumber { get; set; }
         [Required]
         public string? QRCode { get; set; }
         public Decimal Price { get; set; }
-        public int IdEventLocation { get; set; }
-        public int IdCustomer { get; set;}
-        public int IdTypeTicket { get; set; }
+        public Guid IdEventLocation { get; set; }
+        public Guid IdCustomer { get; set;}
+        public Guid IdTypeTicket { get; set; }
 
         [ForeignKey("IdEventLocation")]
         public EventLocation? EventLocation { get; set; }

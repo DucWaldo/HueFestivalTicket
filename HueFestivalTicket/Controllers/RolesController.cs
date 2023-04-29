@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using HueFestivalTicket.Contexts;
 using HueFestivalTicket.Models;
-using Microsoft.AspNetCore.Authorization;
 
 namespace HueFestivalTicket.Controllers
 {
@@ -23,7 +22,6 @@ namespace HueFestivalTicket.Controllers
         }
 
         // GET: api/Roles
-        [Authorize]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Role>>> GetRoles()
         {
@@ -36,7 +34,7 @@ namespace HueFestivalTicket.Controllers
 
         // GET: api/Roles/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Role>> GetRole(int id)
+        public async Task<ActionResult<Role>> GetRole(Guid id)
         {
           if (_context.Roles == null)
           {
@@ -55,7 +53,7 @@ namespace HueFestivalTicket.Controllers
         // PUT: api/Roles/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutRole(int id, Role role)
+        public async Task<IActionResult> PutRole(Guid id, Role role)
         {
             if (id != role.IdRole)
             {
@@ -100,7 +98,7 @@ namespace HueFestivalTicket.Controllers
 
         // DELETE: api/Roles/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteRole(int id)
+        public async Task<IActionResult> DeleteRole(Guid id)
         {
             if (_context.Roles == null)
             {
@@ -118,7 +116,7 @@ namespace HueFestivalTicket.Controllers
             return NoContent();
         }
 
-        private bool RoleExists(int id)
+        private bool RoleExists(Guid id)
         {
             return (_context.Roles?.Any(e => e.IdRole == id)).GetValueOrDefault();
         }

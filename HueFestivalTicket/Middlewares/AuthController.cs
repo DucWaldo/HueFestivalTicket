@@ -28,7 +28,7 @@ namespace HueFestivalTicket.Middlewares
         [HttpPost("Login")]
         public async Task<IActionResult> Login([FromBody] AccountDTO account)
         {
-            var accountLogin = await _context.Accounts.SingleOrDefaultAsync(x => x.Username == account.Username && x.Password == Encrypt.GetMD5Hash(account.Password ?? ""));
+            var accountLogin = await _context.Accounts.SingleOrDefaultAsync(x => x.Username == account.Username && x.Password == Generate.GetMD5Hash(account.Password ?? ""));
             if (accountLogin == null)
             {
                 return Ok(new
@@ -52,7 +52,7 @@ namespace HueFestivalTicket.Middlewares
             });
         }
 
-        private string CreateToken(Account account, Role role)
+        private Token CreateToken(Account account, Role role)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"] ?? "");
@@ -69,7 +69,13 @@ namespace HueFestivalTicket.Middlewares
             };
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
-            return tokenHandler.WriteToken(token);
+            var accessToken = tokenHandler.WriteToken(token);
+
+            return new Token
+            {
+                AccessToken = accessToken,
+                RefreshToken = Generate.GetRefreshToken()
+            };
         }
     }
 }

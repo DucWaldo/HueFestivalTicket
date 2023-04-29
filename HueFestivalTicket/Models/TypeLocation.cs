@@ -7,7 +7,7 @@ namespace HueFestivalTicket.Models
     public class TypeLocation
     {
         [Key]
-        public int IdTypeLocation { get; set; }
+        public Guid IdTypeLocation { get; set; }
         [Required]
         public string? Name { get; set; }
         public string? ImageUrl { get; set; }

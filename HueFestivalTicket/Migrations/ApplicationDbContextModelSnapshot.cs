@@ -24,14 +24,12 @@ namespace HueFestivalTicket.Migrations
 
             modelBuilder.Entity("HueFestivalTicket.Models.Account", b =>
                 {
-                    b.Property<int>("IdAccount")
+                    b.Property<Guid>("IdAccount")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("uniqueidentifier");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdAccount"));
-
-                    b.Property<int>("IdRole")
-                        .HasColumnType("int");
+                    b.Property<Guid>("IdRole")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
@@ -57,17 +55,15 @@ namespace HueFestivalTicket.Migrations
 
             modelBuilder.Entity("HueFestivalTicket.Models.Checkin", b =>
                 {
-                    b.Property<int>("IdCheckin")
+                    b.Property<Guid>("IdCheckin")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("uniqueidentifier");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdCheckin"));
+                    b.Property<Guid>("IdAccount")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("IdAccount")
-                        .HasColumnType("int");
-
-                    b.Property<int>("IdTicket")
-                        .HasColumnType("int");
+                    b.Property<Guid>("IdTicket")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("Status")
                         .HasColumnType("bit");
@@ -86,11 +82,9 @@ namespace HueFestivalTicket.Migrations
 
             modelBuilder.Entity("HueFestivalTicket.Models.Customer", b =>
                 {
-                    b.Property<int>("IdCustomer")
+                    b.Property<Guid>("IdCustomer")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdCustomer"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Email")
                         .IsRequired()
@@ -119,11 +113,9 @@ namespace HueFestivalTicket.Migrations
 
             modelBuilder.Entity("HueFestivalTicket.Models.Event", b =>
                 {
-                    b.Property<int>("IdEvent")
+                    b.Property<Guid>("IdEvent")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdEvent"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Content")
                         .HasColumnType("nvarchar(max)");
@@ -146,11 +138,9 @@ namespace HueFestivalTicket.Migrations
 
             modelBuilder.Entity("HueFestivalTicket.Models.EventLocation", b =>
                 {
-                    b.Property<int>("IdEventLocation")
+                    b.Property<Guid>("IdEventLocation")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdEventLocation"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("DateEnd")
                         .HasColumnType("datetime2");
@@ -158,11 +148,11 @@ namespace HueFestivalTicket.Migrations
                     b.Property<DateTime>("DateStart")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("IdEvent")
-                        .HasColumnType("int");
+                    b.Property<Guid>("IdEvent")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("IdLocation")
-                        .HasColumnType("int");
+                    b.Property<Guid>("IdLocation")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("NumberSlot")
                         .HasColumnType("int");
@@ -184,14 +174,12 @@ namespace HueFestivalTicket.Migrations
 
             modelBuilder.Entity("HueFestivalTicket.Models.ImageEvent", b =>
                 {
-                    b.Property<int>("IdImageEvent")
+                    b.Property<Guid>("IdImageEvent")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("uniqueidentifier");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdImageEvent"));
-
-                    b.Property<int>("IdEvent")
-                        .HasColumnType("int");
+                    b.Property<Guid>("IdEvent")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("ImageUrl")
                         .IsRequired()
@@ -206,11 +194,9 @@ namespace HueFestivalTicket.Migrations
 
             modelBuilder.Entity("HueFestivalTicket.Models.Location", b =>
                 {
-                    b.Property<int>("IdLocation")
+                    b.Property<Guid>("IdLocation")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdLocation"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Address")
                         .HasColumnType("nvarchar(max)");
@@ -218,8 +204,8 @@ namespace HueFestivalTicket.Migrations
                     b.Property<string>("Decription")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("IdTypeLocation")
-                        .HasColumnType("int");
+                    b.Property<Guid>("IdTypeLocation")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("ImageUrl")
                         .HasColumnType("nvarchar(max)");
@@ -235,19 +221,51 @@ namespace HueFestivalTicket.Migrations
                     b.ToTable("Location");
                 });
 
+            modelBuilder.Entity("HueFestivalTicket.Models.ManagerToken", b =>
+                {
+                    b.Property<Guid>("IdRefreshToken")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("ExpiredAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("IdAccount")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsRevoked")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsUsed")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("IssuedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("JwtId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Token")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("IdRefreshToken");
+
+                    b.HasIndex("IdAccount");
+
+                    b.ToTable("ManagerToken");
+                });
+
             modelBuilder.Entity("HueFestivalTicket.Models.News", b =>
                 {
-                    b.Property<int>("IdNews")
+                    b.Property<Guid>("IdNews")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdNews"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Content")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("IdAccount")
-                        .HasColumnType("int");
+                    b.Property<Guid>("IdAccount")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("ImageUrl")
                         .HasColumnType("nvarchar(max)");
@@ -269,17 +287,15 @@ namespace HueFestivalTicket.Migrations
 
             modelBuilder.Entity("HueFestivalTicket.Models.PriceTicket", b =>
                 {
-                    b.Property<int>("IdPriceTicket")
+                    b.Property<Guid>("IdPriceTicket")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("uniqueidentifier");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdPriceTicket"));
+                    b.Property<Guid>("IdEventLocation")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("IdEventLocation")
-                        .HasColumnType("int");
-
-                    b.Property<int>("IdTypeTicket")
-                        .HasColumnType("int");
+                    b.Property<Guid>("IdTypeTicket")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
@@ -295,11 +311,9 @@ namespace HueFestivalTicket.Migrations
 
             modelBuilder.Entity("HueFestivalTicket.Models.Role", b =>
                 {
-                    b.Property<int>("IdRole")
+                    b.Property<Guid>("IdRole")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdRole"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -313,15 +327,16 @@ namespace HueFestivalTicket.Migrations
 
             modelBuilder.Entity("HueFestivalTicket.Models.Support", b =>
                 {
-                    b.Property<int>("IdSuport")
+                    b.Property<Guid>("IdSuport")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdSuport"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Content")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("IdAccount")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -330,25 +345,25 @@ namespace HueFestivalTicket.Migrations
 
                     b.HasKey("IdSuport");
 
+                    b.HasIndex("IdAccount");
+
                     b.ToTable("Support");
                 });
 
             modelBuilder.Entity("HueFestivalTicket.Models.Ticket", b =>
                 {
-                    b.Property<int>("IdTicket")
+                    b.Property<Guid>("IdTicket")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("uniqueidentifier");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdTicket"));
+                    b.Property<Guid>("IdCustomer")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("IdCustomer")
-                        .HasColumnType("int");
+                    b.Property<Guid>("IdEventLocation")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("IdEventLocation")
-                        .HasColumnType("int");
-
-                    b.Property<int>("IdTypeTicket")
-                        .HasColumnType("int");
+                    b.Property<Guid>("IdTypeTicket")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
@@ -374,11 +389,9 @@ namespace HueFestivalTicket.Migrations
 
             modelBuilder.Entity("HueFestivalTicket.Models.TypeLocation", b =>
                 {
-                    b.Property<int>("IdTypeLocation")
+                    b.Property<Guid>("IdTypeLocation")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdTypeLocation"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("ImageUrl")
                         .HasColumnType("nvarchar(max)");
@@ -394,11 +407,9 @@ namespace HueFestivalTicket.Migrations
 
             modelBuilder.Entity("HueFestivalTicket.Models.TypeTicket", b =>
                 {
-                    b.Property<int>("IdTypeTicket")
+                    b.Property<Guid>("IdTypeTicket")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdTypeTicket"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -426,8 +437,8 @@ namespace HueFestivalTicket.Migrations
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
 
-                    b.Property<int>("IdAccount")
-                        .HasColumnType("int");
+                    b.Property<Guid>("IdAccount")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("LastName")
                         .IsRequired()
@@ -519,6 +530,17 @@ namespace HueFestivalTicket.Migrations
                     b.Navigation("TypeLocation");
                 });
 
+            modelBuilder.Entity("HueFestivalTicket.Models.ManagerToken", b =>
+                {
+                    b.HasOne("HueFestivalTicket.Models.Account", "Account")
+                        .WithMany()
+                        .HasForeignKey("IdAccount")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Account");
+                });
+
             modelBuilder.Entity("HueFestivalTicket.Models.News", b =>
                 {
                     b.HasOne("HueFestivalTicket.Models.Account", "Account")
@@ -547,6 +569,17 @@ namespace HueFestivalTicket.Migrations
                     b.Navigation("EventLocation");
 
                     b.Navigation("TypeTicket");
+                });
+
+            modelBuilder.Entity("HueFestivalTicket.Models.Support", b =>
+                {
+                    b.HasOne("HueFestivalTicket.Models.Account", "Account")
+                        .WithMany()
+                        .HasForeignKey("IdAccount")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Account");
                 });
 
             modelBuilder.Entity("HueFestivalTicket.Models.Ticket", b =>

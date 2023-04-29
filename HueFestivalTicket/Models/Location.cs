@@ -7,13 +7,13 @@ namespace HueFestivalTicket.Models
     public class Location
     {
         [Key]
-        public int IdLocation { get; set; }
+        public Guid IdLocation { get; set; }
         [Required]
         public string? Title { get; set; }
         public string? Decription { get; set; }
         public string? Address { get; set; }
         public string? ImageUrl { get; set; }
-        public int IdTypeLocation { get; set; }
+        public Guid IdTypeLocation { get; set; }
 
         [ForeignKey("IdTypeLocation")]
         public TypeLocation? TypeLocation { get; set; }

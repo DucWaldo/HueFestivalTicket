@@ -7,11 +7,11 @@ namespace HueFestivalTicket.Models
     public class Checkin
     {
         [Key]
-        public int IdCheckin { get; set; }
+        public Guid IdCheckin { get; set; }
         public DateTime TimeCheckin { get; set; }
         public bool Status { get; set; }
-        public int IdAccount { get; set; }
-        public int IdTicket { get; set; }
+        public Guid IdAccount { get; set; }
+        public Guid IdTicket { get; set; }
 
         [ForeignKey("IdAccount")]
         public Account? Account { get; set; }

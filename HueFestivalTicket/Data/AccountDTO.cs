@@ -7,7 +7,7 @@ namespace HueFestivalTicket.Data
         public string? Username { get; set; }
         public string? Password { get; set; }
 
-        public static AccountDTO FromUser(Account account)
+        public static AccountDTO FromAccount(Account account)
         {
             return new AccountDTO
             {

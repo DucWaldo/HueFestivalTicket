@@ -1,5 +1,7 @@
 using HueFestivalTicket.Contexts;
+using HueFestivalTicket.Helpers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System;
@@ -36,6 +38,7 @@ builder.Services.AddAuthentication(options =>
         ClockSkew = TimeSpan.Zero
     };
 });
+builder.Services.AddAutoMapper(typeof(AutoMapping).Assembly);
 
 var app = builder.Build();
 

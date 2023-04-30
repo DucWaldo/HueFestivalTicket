@@ -152,7 +152,7 @@ namespace HueFestivalTicket.Controllers
                 Username = account.Username,
                 Password = Generate.GetMD5Hash(account.Password ?? ""),
                 IsActive = true,
-                TimeJoined = DateTime.Now,
+                TimeJoined = DateTime.UtcNow,
                 IdRole = Guid.Parse("3fa85f64-5717-4562-b3fc-2c963f66afa6")
             };
 
@@ -160,16 +160,6 @@ namespace HueFestivalTicket.Controllers
             await _context.SaveChangesAsync();
 
             return Ok();
-        }
-
-        [Authorize]
-        [HttpPost("Logout")]
-        public IActionResult Logout()
-        {
-            return Ok(new 
-            { 
-                message = "Logout successfullys" 
-            });
         }
     }
 }

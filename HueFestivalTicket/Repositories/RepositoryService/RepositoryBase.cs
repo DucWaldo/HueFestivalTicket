@@ -1,7 +1,7 @@
 ﻿using HueFestivalTicket.Contexts;
 using Microsoft.EntityFrameworkCore;
 
-namespace HueFestivalTicket.Data.Repository
+namespace HueFestivalTicket.Repositories.RepositoryService
 {
     public class RepositoryBase<TEntity> : IRepository<TEntity> where TEntity : class
     {

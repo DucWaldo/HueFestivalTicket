@@ -1,6 +1,6 @@
 ﻿using HueFestivalTicket.Data;
-using HueFestivalTicket.Data.Repository;
 using HueFestivalTicket.Models;
+using HueFestivalTicket.Repositories.RepositoryService;
 
 namespace HueFestivalTicket.Repositories.IRepositories
 {

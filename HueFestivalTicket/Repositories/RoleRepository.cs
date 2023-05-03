@@ -1,9 +1,9 @@
 ﻿using AutoMapper;
 using HueFestivalTicket.Contexts;
 using HueFestivalTicket.Data;
-using HueFestivalTicket.Data.Repository;
 using HueFestivalTicket.Models;
 using HueFestivalTicket.Repositories.IRepositories;
+using HueFestivalTicket.Repositories.RepositoryService;
 using Microsoft.EntityFrameworkCore;
 
 namespace HueFestivalTicket.Repositories
@@ -56,7 +56,6 @@ namespace HueFestivalTicket.Repositories
                 _dbSet.Update(existingRole);
                 await _context.SaveChangesAsync();
             }
-
         }
     }
 }

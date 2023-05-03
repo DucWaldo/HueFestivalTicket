@@ -104,7 +104,6 @@ namespace HueFestivalTicket.Controllers
             }
 
             await _roleRepository.InsertRoleAsync(role);
-            await _context.SaveChangesAsync();
             return Ok(new
             {
                 Message = "Create Success",

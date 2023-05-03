@@ -41,6 +41,7 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAutoMapper(typeof(AutoMapping).Assembly);
 builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 builder.Services.AddScoped<IEventRepository, EventRepository>();
+builder.Services.AddScoped<IImageEventRepository, ImageEventRepository>();
 
 var app = builder.Build();
 

@@ -1,16 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+﻿using AutoMapper;
 using HueFestivalTicket.Contexts;
-using HueFestivalTicket.Models;
-using Microsoft.AspNetCore.Authorization;
 using HueFestivalTicket.Data;
-using AutoMapper;
-using Microsoft.DotNet.Scaffolding.Shared.Messaging;
+using HueFestivalTicket.Models;
+using HueFestivalTicket.Repositories.IRepositories;
+using Microsoft.AspNetCore.Mvc;
 
 namespace HueFestivalTicket.Controllers
 {
@@ -21,12 +14,12 @@ namespace HueFestivalTicket.Controllers
     public class RolesController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
-        private readonly IMapper _mapper;
+        private readonly IRoleRepository _roleRepository;
 
-        public RolesController(ApplicationDbContext context, IMapper mapper)
+        public RolesController(ApplicationDbContext context, IMapper mapper, IRoleRepository roleRepository)
         {
             _context = context;
-            _mapper = mapper;
+            _roleRepository = roleRepository;
         }
 
         // GET: api/Roles
@@ -38,21 +31,20 @@ namespace HueFestivalTicket.Controllers
                 return NotFound();
             }
 
-            var result = _mapper.Map<List<Role>, List<RoleDTO>>(await _context.Roles.ToListAsync());
-
-            return result;
+            return await _roleRepository.GetAllRolesAsync();
         }
 
         // GET: api/Roles/5
         [HttpGet("{name}")]
         public async Task<ActionResult<RoleDTO>> GetRole(string name)
         {
-          if (_context.Roles == null)
-          {
-              return NotFound();
-          }
-            var role = await _context.Roles.FirstOrDefaultAsync(r => r.Name == name);
-            
+
+
+            if (_context.Roles == null)
+            {
+                return NotFound();
+            }
+            var role = await _roleRepository.GetRoleByNameAsync(name);
             if (role == null)
             {
                 return Ok(new
@@ -60,8 +52,7 @@ namespace HueFestivalTicket.Controllers
                     Message = "Role doesn't exist"
                 });
             }
-            var result = _mapper.Map<Role, RoleDTO>(role);
-            return result;
+            return role;
         }
 
         // PUT: api/Roles/5
@@ -69,7 +60,7 @@ namespace HueFestivalTicket.Controllers
         [HttpPut("{oldName}")]
         public async Task<IActionResult> PutRole(string oldName, RoleDTO newName)
         {
-            var roles = await _context.Roles.FirstOrDefaultAsync(r => r.Name == oldName);
+            var roles = await _roleRepository.GetRoleByNameAsync(oldName ?? "");
             if (roles == null)
             {
                 return Ok(new
@@ -78,8 +69,8 @@ namespace HueFestivalTicket.Controllers
                 });
             }
 
-            var check = await _context.Roles.FirstOrDefaultAsync(r => r.Name == newName.Name);
-            if (check != null)
+            var checkNewName = await _roleRepository.GetRoleByNameAsync(newName.Name ?? "");
+            if (checkNewName != null)
             {
                 return Ok(new
                 {
@@ -87,10 +78,8 @@ namespace HueFestivalTicket.Controllers
                 });
             }
 
-            roles.Name = newName.Name;
-
-            await _context.SaveChangesAsync();
-            return Ok( new
+            await _roleRepository.UpdateRoleAsync(oldName ?? "", newName);
+            return Ok(new
             {
                 Message = $"Update {oldName} to {newName.Name} Success"
             });
@@ -101,11 +90,11 @@ namespace HueFestivalTicket.Controllers
         [HttpPost]
         public async Task<ActionResult<Role>> PostRole(RoleDTO role)
         {
-          if (_context.Roles == null)
-          {
-              return Problem("Entity set 'ApplicationDbContext.Roles'  is null.");
-          }
-            var roleName = await _context.Roles.FirstOrDefaultAsync(x => x.Name == role.Name);
+            if (_context.Roles == null)
+            {
+                return Problem("Entity set 'ApplicationDbContext.Roles'  is null.");
+            }
+            var roleName = await _roleRepository.GetRoleByNameAsync(role.Name ?? "");
             if (roleName != null)
             {
                 return Ok(new
@@ -114,18 +103,12 @@ namespace HueFestivalTicket.Controllers
                 });
             }
 
-            var roles = new Role
-            {
-                Name = role.Name
-            };
-
-            await _context.Roles.AddAsync(roles);
+            await _roleRepository.InsertRoleAsync(role);
             await _context.SaveChangesAsync();
-
-            return Ok(new 
-            { 
-                Message = "Create Success", 
-                role 
+            return Ok(new
+            {
+                Message = "Create Success",
+                role
             });
         }
 
@@ -137,27 +120,20 @@ namespace HueFestivalTicket.Controllers
             {
                 return NotFound();
             }
-            var role = await _context.Roles.FirstOrDefaultAsync(r => r.Name == name);
+            var role = await _roleRepository.GetRoleByNameAsync(name ?? "");
             if (role == null)
             {
                 return NotFound();
             }
 
-            _context.Roles.Remove(role);
-            await _context.SaveChangesAsync();
+            await _roleRepository.DeleteRoleAsync(name ?? "");
 
-            //var result = await _context.Roles.ToListAsync();
-            var result = _mapper.Map<List<Role>, List<RoleDTO>>(await _context.Roles.ToListAsync());
+            var result = await _roleRepository.GetAllRolesAsync();
             return Ok(new
             {
                 Message = $"Delete {name} success",
                 result
             });
-        }
-
-        private bool RoleExists(Guid id)
-        {
-            return (_context.Roles?.Any(e => e.IdRole == id)).GetValueOrDefault();
         }
     }
 }

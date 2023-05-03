@@ -423,11 +423,9 @@ namespace HueFestivalTicket.Migrations
 
             modelBuilder.Entity("HueFestivalTicket.Models.User", b =>
                 {
-                    b.Property<int>("IdUser")
+                    b.Property<Guid>("IdUser")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdUser"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Email")
                         .HasColumnType("nvarchar(max)");

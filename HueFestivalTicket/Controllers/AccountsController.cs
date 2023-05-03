@@ -153,7 +153,7 @@ namespace HueFestivalTicket.Controllers
                 Password = Generate.GetMD5Hash(account.Password ?? ""),
                 IsActive = true,
                 TimeJoined = DateTime.UtcNow,
-                IdRole = Guid.Parse("3fa85f64-5717-4562-b3fc-2c963f66afa6")
+                IdRole = Guid.Parse("018cceb3-5aa7-4283-e3f5-08db49dc998c")
             };
 
             await _context.Accounts.AddAsync(acc);

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace HueFestivalTicket.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20230429105331_Init")]
-    partial class Init
+    [Migration("20230501003644_ChangeTypeIdUser")]
+    partial class ChangeTypeIdUser
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -426,11 +426,9 @@ namespace HueFestivalTicket.Migrations
 
             modelBuilder.Entity("HueFestivalTicket.Models.User", b =>
                 {
-                    b.Property<int>("IdUser")
+                    b.Property<Guid>("IdUser")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("IdUser"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Email")
                         .HasColumnType("nvarchar(max)");

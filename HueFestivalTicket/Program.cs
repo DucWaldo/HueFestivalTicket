@@ -1,10 +1,10 @@
 using HueFestivalTicket.Contexts;
 using HueFestivalTicket.Helpers;
+using HueFestivalTicket.Repositories;
+using HueFestivalTicket.Repositories.IRepositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using System;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -39,6 +39,7 @@ builder.Services.AddAuthentication(options =>
     };
 });
 builder.Services.AddAutoMapper(typeof(AutoMapping).Assembly);
+builder.Services.AddScoped<IRoleRepository, RoleRepository>();
 
 var app = builder.Build();
 

@@ -9,6 +9,7 @@ namespace HueFestivalTicket.Helpers
         public AutoMapping()
         {
             CreateMap<Role, RoleDTO>().ReverseMap();
+            CreateMap<User, UserDTO>().ReverseMap();
         }
     }
 }

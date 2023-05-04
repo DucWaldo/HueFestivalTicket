@@ -1,8 +1,8 @@
 ﻿using HueFestivalTicket.Contexts;
+using HueFestivalTicket.Data;
 using HueFestivalTicket.Models;
 using HueFestivalTicket.Repositories.IRepositories;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace HueFestivalTicket.Controllers
 {
@@ -29,25 +29,27 @@ namespace HueFestivalTicket.Controllers
             {
                 return NotFound();
             }
-            return await _context.ImageEvents.ToListAsync();
+            return await _imageEventRepository.GetAllImageEventsAsync();
         }
 
         // GET: api/ImageEvents/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<ImageEvent>> GetImageEvent(Guid id)
+        public async Task<ActionResult<ImageEvent>> GetImageEventById(Guid id)
         {
             if (_context.ImageEvents == null)
             {
                 return NotFound();
             }
-            var imageEvent = await _context.ImageEvents.FindAsync(id);
+            var imageEvent = await _imageEventRepository.GetImageEventByIdAsync(id);
 
             if (imageEvent == null)
             {
-                return NotFound();
+                return Ok(new
+                {
+                    Message = $"This {id} already exists"
+                });
             }
-
-            return imageEvent;
+            return File(imageEvent.ImageUrl ?? "", "image/jpeg");
         }
 
         // PUT: api/ImageEvents/5
@@ -64,24 +66,9 @@ namespace HueFestivalTicket.Controllers
                 });
             }
             DeleteFile(image.ImageUrl);
-            /*var imagePath = _environment.WebRootPath + image.ImageUrl;
-            if (System.IO.File.Exists(imagePath))
-            {
-                System.IO.File.Delete(imagePath);
-            }*/
 
             var imageName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
             InsertFile(file, imageName);
-            /*var newImagePath = _environment.WebRootPath + "\\images\\";
-            if (!Directory.Exists(newImagePath))
-            {
-                Directory.CreateDirectory(newImagePath);
-            }
-            using (FileStream stream = System.IO.File.Create(newImagePath + imageName))
-            {
-                await file.CopyToAsync(stream);
-                stream.Flush();
-            }*/
 
             var url = "/images/" + imageName;
             await _imageEventRepository.UpdateImageEventAsync(id, url);
@@ -97,13 +84,13 @@ namespace HueFestivalTicket.Controllers
         // POST: api/ImageEvents
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<ImageEvent>> PostImageEvent(List<IFormFile> files, Guid id)
+        public async Task<ActionResult<ImageEvent>> PostImageEvent([FromForm] ImageEventDTO imageEvent)
         {
             if (_context.ImageEvents == null)
             {
                 return Problem("Entity set 'ApplicationDbContext.ImageEvents'  is null.");
             }
-            if (files == null || files.Count == 0)
+            if (imageEvent.ImageUrl == null || imageEvent.ImageUrl.Count == 0)
             {
                 return Ok(new
                 {
@@ -111,33 +98,21 @@ namespace HueFestivalTicket.Controllers
                 });
             }
 
-            foreach (var file in files)
+            foreach (var file in imageEvent.ImageUrl)
             {
                 var imageName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-                /*
-                var imagePath = _environment.WebRootPath + "\\images\\";
-                if (!Directory.Exists(imagePath))
-                {
-                    Directory.CreateDirectory(imagePath);
-                }
-                using (FileStream stream = System.IO.File.Create(imagePath + imageName))
-                {
-                    await file.CopyToAsync(stream);
-                    stream.Flush();
-                }
-                */
                 InsertFile(file, imageName);
                 var image = new ImageEvent
                 {
                     ImageUrl = "/images/" + imageName,
-                    IdEvent = id
+                    IdEvent = imageEvent.IdEvent
                 };
                 await _imageEventRepository.InsertImageEventAsync(image);
             }
             return Ok(new
             {
                 Message = "Insert Success",
-
+                imageEvent
             });
         }
 
@@ -161,12 +136,13 @@ namespace HueFestivalTicket.Controllers
             DeleteFile(imageEvent.ImageUrl);
 
             await _imageEventRepository.DeleteImageEventAsync(id);
-            await _context.SaveChangesAsync();
+
+            var getAll = await _imageEventRepository.GetAllImageEventsAsync();
 
             return Ok(new
             {
                 Message = "Delete Success",
-
+                getAll
             });
         }
 

@@ -22,22 +22,20 @@ namespace HueFestivalTicket.Repositories.RepositoryService
         public async Task InsertAsync(TEntity entity)
         {
             await _dbSet.AddAsync(entity);
+            await _context.SaveChangesAsync();
         }
 
         public async Task UpdateAsync(TEntity entity)
         {
-            _context.Entry(entity).State = EntityState.Modified;
-            _dbSet.Attach(entity);
-            await Task.FromResult(0);
+            _dbSet.Update(entity);
+            await _context.SaveChangesAsync();
         }
 
         public async Task DeleteAsync(TEntity entity)
         {
             _dbSet.Remove(entity);
-            await Task.FromResult(0);
+            await _context.SaveChangesAsync();
         }
-
-
 
         /*
         public RepositoryBase(ApplicationDbContext dbContext)

@@ -22,31 +22,36 @@ namespace HueFestivalTicket.Repositories
             var imageEvent = await _dbSet.FirstOrDefaultAsync(ie => ie.IdImageEvent == id);
             if (imageEvent != null)
             {
-                _dbSet.Remove(imageEvent);
-                await _context.SaveChangesAsync();
+                //_dbSet.Remove(imageEvent);
+                await DeleteAsync(imageEvent);
+                //await _context.SaveChangesAsync();
             }
         }
 
-        public Task<List<ImageEvent>> GetAllImageEventsAsync()
+        public async Task<List<ImageEvent>> GetAllImageEventsAsync()
         {
-            throw new NotImplementedException();
+            //var imageEvents = await _dbSet.ToListAsync();
+            var imageEvents = await GetAllAsync();
+            return imageEvents;
         }
 
-        public async Task<ImageEvent> GetImageEventByIdAsync(Guid id)
+        public async Task<ImageEvent?> GetImageEventByIdAsync(Guid id)
         {
             var imageEvent = await _dbSet.FirstOrDefaultAsync(ie => ie.IdImageEvent == id);
-            return imageEvent ?? new ImageEvent();
+            return imageEvent;
         }
 
-        public Task GetImageEventByUrlAsync(string url)
+        public async Task<ImageEvent?> GetImageEventByUrlAsync(string url)
         {
-            throw new NotImplementedException();
+            var imageEvent = await _dbSet.FirstOrDefaultAsync(ie => ie.ImageUrl == url);
+            return imageEvent;
         }
 
         public async Task InsertImageEventAsync(ImageEvent imageEvent)
         {
-            await _dbSet.AddAsync(imageEvent);
-            await _context.SaveChangesAsync();
+            //await _dbSet.AddAsync(imageEvent);
+            await InsertAsync(imageEvent);
+            //await _context.SaveChangesAsync();
         }
 
         public async Task UpdateImageEventAsync(Guid id, string url)
@@ -56,8 +61,9 @@ namespace HueFestivalTicket.Repositories
             if (existingImageEvent != null)
             {
                 existingImageEvent.ImageUrl = url;
-                _dbSet.Update(existingImageEvent);
-                await _context.SaveChangesAsync();
+                //_dbSet.Update(existingImageEvent);
+                await UpdateAsync(existingImageEvent);
+                //await _context.SaveChangesAsync();
             }
 
         }

@@ -2,6 +2,7 @@
 {
     public class ImageEventDTO
     {
-        public string? ImageUrl { get; set; }
+        public List<IFormFile>? ImageUrl { get; set; }
+        public Guid IdEvent { get; set; }
     }
 }

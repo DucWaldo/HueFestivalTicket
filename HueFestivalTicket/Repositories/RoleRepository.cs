@@ -21,8 +21,7 @@ namespace HueFestivalTicket.Repositories
         public async Task InsertRoleAsync(RoleDTO role)
         {
             var newRole = _mapper.Map<Role>(role);
-            await _dbSet.AddAsync(newRole);
-            await _context.SaveChangesAsync();
+            await InsertAsync(newRole);
         }
 
         public async Task DeleteRoleAsync(string name)
@@ -30,14 +29,13 @@ namespace HueFestivalTicket.Repositories
             var role = await _dbSet.FirstOrDefaultAsync(r => r.Name == name);
             if (role != null)
             {
-                _dbSet.Remove(role);
-                await _context.SaveChangesAsync();
+                await DeleteAsync(role);
             }
         }
 
         public async Task<List<RoleDTO>> GetAllRolesAsync()
         {
-            var roles = await _dbSet.ToListAsync();
+            var roles = await GetAllAsync();
             return _mapper.Map<List<RoleDTO>>(roles);
         }
 
@@ -53,8 +51,7 @@ namespace HueFestivalTicket.Repositories
             _mapper.Map(role, existingRole);
             if (existingRole != null)
             {
-                _dbSet.Update(existingRole);
-                await _context.SaveChangesAsync();
+                await UpdateAsync(existingRole);
             }
         }
     }

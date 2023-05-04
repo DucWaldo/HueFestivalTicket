@@ -1,8 +1,8 @@
-﻿using AutoMapper;
-using HueFestivalTicket.Contexts;
+﻿using HueFestivalTicket.Contexts;
 using HueFestivalTicket.Data;
 using HueFestivalTicket.Middlewares;
 using HueFestivalTicket.Models;
+using HueFestivalTicket.Repositories.IRepositories;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
@@ -14,12 +14,14 @@ namespace HueFestivalTicket.Controllers
     public class UsersController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
-        private readonly IMapper _mapper;
+        private readonly IUserRepository _userRepository;
+        private readonly IAccountRepository _accountRepository;
 
-        public UsersController(ApplicationDbContext context, IMapper mapper)
+        public UsersController(ApplicationDbContext context, IUserRepository userRepository, IAccountRepository accountRepository)
         {
             _context = context;
-            _mapper = mapper;
+            _userRepository = userRepository;
+            _accountRepository = accountRepository;
         }
 
         // GET: api/Users
@@ -30,7 +32,7 @@ namespace HueFestivalTicket.Controllers
             {
                 return NotFound();
             }
-            return await _context.Users.ToListAsync();
+            return await _userRepository.GetAllUsersAsync();
         }
 
         // GET: api/Users/5
@@ -45,9 +47,11 @@ namespace HueFestivalTicket.Controllers
 
             if (user == null)
             {
-                return NotFound();
+                return Ok(new
+                {
+                    Message = $"Can't find user by {id}"
+                });
             }
-
             return user;
         }
 
@@ -66,17 +70,24 @@ namespace HueFestivalTicket.Controllers
                 });
             }
 
-            var check = await _context.Users.FirstOrDefaultAsync(p => p.PhoneNumber == user.PhoneNumber || p.Email == user.Email);
-            if (check != null)
+            if (users.PhoneNumber != user.PhoneNumber)
+            {
+                return Ok(new
+                {
+                    Message = "Phone number doesn't match"
+                });
+            }
+
+            var check = await _context.Users.Where(c => c.IdUser != users.IdUser).ToListAsync();
+            if (check.Any(c => c.Email == user.Email || c.PhoneNumber == user.PhoneNumber))
             {
                 return Ok(new
                 {
                     Message = "Email or Phone Number already exists"
                 });
             }
-            _context.Entry(user).State = EntityState.Modified;
 
-            _mapper.Map(user, users);
+            await _userRepository.UpdateUserAsync(user, users);
             await _context.SaveChangesAsync();
 
             return Ok(users);
@@ -126,7 +137,7 @@ namespace HueFestivalTicket.Controllers
                 TimeJoined = DateTime.UtcNow,
                 IdRole = getRole.IdRole
             };
-            await _context.Accounts.AddAsync(newAccount);
+            await _accountRepository.InsertAccountAsync(newAccount);
             await _context.SaveChangesAsync();
 
             var newUser = new User
@@ -138,14 +149,49 @@ namespace HueFestivalTicket.Controllers
                 Organization = user.Organization,
                 IdAccount = newAccount.IdAccount
             };
-            await _context.Users.AddAsync(newUser);
+            await _userRepository.InsertUserAsync(newUser);
             await _context.SaveChangesAsync();
 
-            //return CreatedAtAction("GetUser", new { id = user.IdUser }, user);
             return Ok(new
             {
                 newUser,
                 newAccount
+            });
+        }
+
+        // DELETE: api/Users/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteUser(Guid id)
+        {
+            if (_context.Users == null)
+            {
+                return NotFound();
+            }
+            var user = await _userRepository.GetUserByIdAsync(id);
+            if (user == null)
+            {
+                return Ok(new
+                {
+                    Message = "Can't find this user"
+                });
+            }
+
+            var account = await _accountRepository.GetAccountByIdAsync(user.IdAccount);
+            if (account == null)
+            {
+                return Ok(new
+                {
+                    Message = "Can't find this account"
+                });
+            }
+
+            await _userRepository.DeleteUserAsync(user);
+            await _accountRepository.DeleteAccountAsync(account);
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                Message = "Delete Success"
             });
         }
 
@@ -160,44 +206,6 @@ namespace HueFestivalTicket.Controllers
         {
             var regex = new Regex(@"^(\+[0-9]{1,3})?[0-9]{10}$");
             return regex.IsMatch(phone ?? "");
-        }
-
-        // DELETE: api/Users/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteUser(Guid id)
-        {
-            if (_context.Users == null)
-            {
-                return NotFound();
-            }
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.IdUser == id);
-            if (user == null)
-            {
-                return Ok(new
-                {
-                    Message = "Can't find this user"
-                });
-            }
-
-            var account = await _context.Accounts.FirstOrDefaultAsync(a => a.IdAccount == user.IdAccount);
-            if (account == null)
-            {
-                return Ok(new
-                {
-                    Message = "Can't find this account"
-                });
-            }
-
-            _context.Users.Remove(user);
-            _context.Accounts.Remove(account);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool UserExists(Guid id)
-        {
-            return (_context.Users?.Any(e => e.IdUser == id)).GetValueOrDefault();
         }
     }
 }

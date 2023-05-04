@@ -7,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Security.Cryptography;
 using System.Text;
 
 namespace HueFestivalTicket.Middlewares
@@ -62,7 +61,7 @@ namespace HueFestivalTicket.Middlewares
             {
                 Subject = new ClaimsIdentity(new Claim[]
                 {
-                    new Claim(ClaimTypes.NameIdentifier, account.Username ?? ""),
+                    new Claim(ClaimTypes.NameIdentifier, account.IdAccount.ToString() ?? ""),
                     new Claim(ClaimTypes.Role, role.Name ?? "")
                 }),
                 Expires = DateTime.UtcNow.AddDays(1),
@@ -219,7 +218,7 @@ namespace HueFestivalTicket.Middlewares
         {
             return Ok(new
             {
-                message = "Logout successfullys"
+                message = "Logout success"
             });
         }
     }

@@ -34,10 +34,10 @@ namespace HueFestivalTicket.Repositories
             return events;
         }
 
-        public async Task<EventDTO> GetEventByIdAsync(Guid Id)
+        public async Task<Event?> GetEventByIdAsync(Guid Id)
         {
             var events = await _dbSet.FirstOrDefaultAsync(e => e.IdEvent == Id);
-            return _mapper.Map<EventDTO>(events);
+            return events;
         }
 
         public async Task<EventDTO> GetEventByNameAsync(string name)
@@ -52,14 +52,10 @@ namespace HueFestivalTicket.Repositories
             await InsertAsync(newEvent);
         }
 
-        public async Task UpdateEventAsync(Guid Id, EventDTO newEvent)
+        public async Task UpdateEventAsync(Event oldEvent, EventDTO newEvent)
         {
-            var events = await _dbSet.FirstOrDefaultAsync(e => e.IdEvent == Id);
-            _mapper.Map(newEvent, events);
-            if (events != null)
-            {
-                await UpdateAsync(events);
-            }
+            _mapper.Map(newEvent, oldEvent);
+            await UpdateAsync(oldEvent);
         }
     }
 }

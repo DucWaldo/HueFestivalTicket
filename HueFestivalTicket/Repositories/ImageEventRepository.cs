@@ -22,15 +22,12 @@ namespace HueFestivalTicket.Repositories
             var imageEvent = await _dbSet.FirstOrDefaultAsync(ie => ie.IdImageEvent == id);
             if (imageEvent != null)
             {
-                //_dbSet.Remove(imageEvent);
                 await DeleteAsync(imageEvent);
-                //await _context.SaveChangesAsync();
             }
         }
 
         public async Task<List<ImageEvent>> GetAllImageEventsAsync()
         {
-            //var imageEvents = await _dbSet.ToListAsync();
             var imageEvents = await GetAllAsync();
             return imageEvents;
         }
@@ -49,9 +46,7 @@ namespace HueFestivalTicket.Repositories
 
         public async Task InsertImageEventAsync(ImageEvent imageEvent)
         {
-            //await _dbSet.AddAsync(imageEvent);
             await InsertAsync(imageEvent);
-            //await _context.SaveChangesAsync();
         }
 
         public async Task UpdateImageEventAsync(Guid id, string url)
@@ -61,9 +56,7 @@ namespace HueFestivalTicket.Repositories
             if (existingImageEvent != null)
             {
                 existingImageEvent.ImageUrl = url;
-                //_dbSet.Update(existingImageEvent);
                 await UpdateAsync(existingImageEvent);
-                //await _context.SaveChangesAsync();
             }
 
         }

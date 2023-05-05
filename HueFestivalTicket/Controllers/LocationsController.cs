@@ -40,11 +40,14 @@ namespace HueFestivalTicket.Controllers
             {
                 return NotFound();
             }
-            var location = await _context.Locations.FindAsync(id);
+            var location = await _locationRepository.GetLocationByIdAsync(id);
 
             if (location == null)
             {
-                return NotFound();
+                return Ok(new
+                {
+                    Message = $"Id {id} doesn't exist"
+                });
             }
 
             return location;

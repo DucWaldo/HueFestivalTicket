@@ -38,9 +38,16 @@ namespace HueFestivalTicket.Repositories
             return support;
         }
 
-        public async Task InsertSupportAsync(Support support)
+        public async Task<Support> InsertSupportAsync(SupportDTO support, Guid idAccount)
         {
-            await InsertAsync(support);
+            var newSupport = new Support
+            {
+                Title = support.Title,
+                Content = support.Content,
+                IdAccount = idAccount
+            };
+            await InsertAsync(newSupport);
+            return newSupport;
         }
 
         public async Task UpdateSupportAsync(Support oldSupport, SupportDTO newSupport)

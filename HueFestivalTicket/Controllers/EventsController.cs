@@ -32,7 +32,7 @@ namespace HueFestivalTicket.Controllers
 
         // GET: api/Events/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<EventDTO>> GetEvent(Guid id)
+        public async Task<ActionResult<Event>> GetEvent(Guid id)
         {
             if (_context.Events == null)
             {
@@ -54,10 +54,10 @@ namespace HueFestivalTicket.Controllers
         // PUT: api/Events/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutEvent(Guid id, EventDTO @event)
+        public async Task<IActionResult> PutEvent(Guid id, EventDTO newEvent)
         {
-            var check = await _eventRepository.GetEventByIdAsync(id);
-            if (check == null)
+            var oldEvent = await _eventRepository.GetEventByIdAsync(id);
+            if (oldEvent == null)
             {
                 return Ok(new
                 {
@@ -65,11 +65,19 @@ namespace HueFestivalTicket.Controllers
                 });
             }
 
-            await _eventRepository.UpdateEventAsync(id, @event);
+            if (newEvent.TypeEvent < 1 || newEvent.TypeEvent > 2)
+            {
+                return Ok(new
+                {
+                    Message = "Please choose 1 (Spotlight) or 2 (Community) for TypeEvent"
+                });
+            }
+
+            await _eventRepository.UpdateEventAsync(oldEvent, newEvent);
 
             return Ok(new
             {
-                Message = $"Change success"
+                Message = "Update success"
             });
         }
 
@@ -99,7 +107,6 @@ namespace HueFestivalTicket.Controllers
                 });
             }
 
-
             await _eventRepository.InsertEventAsync(@event);
 
             return Ok(new
@@ -127,7 +134,6 @@ namespace HueFestivalTicket.Controllers
             }
 
             await _eventRepository.DeleteEventAsync(id);
-            await _context.SaveChangesAsync();
 
             return Ok(new
             {

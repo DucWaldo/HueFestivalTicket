@@ -11,11 +11,9 @@ namespace HueFestivalTicket.Repositories
     public class RoleRepository : RepositoryBase<Role>, IRoleRepository
     {
         private readonly IMapper _mapper;
-        private readonly ApplicationDbContext _context;
 
         public RoleRepository(ApplicationDbContext context, IMapper mapper) : base(context)
         {
-            _context = context;
             _mapper = mapper;
         }
         public async Task InsertRoleAsync(RoleDTO role)

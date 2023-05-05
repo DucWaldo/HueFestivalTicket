@@ -56,7 +56,7 @@ namespace HueFestivalTicket.Controllers
         // PUT: api/Supports/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutSupport(Guid id, SupportDTO support)
+        public async Task<IActionResult> PutSupport(Guid id, SupportDTO newSupport)
         {
             var oldSupport = await _supportRepository.GetSupportByIdAsync(id);
             if (oldSupport == null)
@@ -66,7 +66,17 @@ namespace HueFestivalTicket.Controllers
                     Message = $"Id {id} doesn't exist"
                 });
             }
-            await _supportRepository.UpdateSupportAsync(oldSupport, support);
+
+            var checkTitle = await _supportRepository.GetSupportByTitleAsync(newSupport.Title ?? "");
+            if (checkTitle != null)
+            {
+                return Ok(new
+                {
+                    Message = $"Title {newSupport.Title} already exists"
+                });
+            }
+
+            await _supportRepository.UpdateSupportAsync(oldSupport, newSupport);
             return Ok(new
             {
                 Message = "Update Success"
@@ -94,19 +104,12 @@ namespace HueFestivalTicket.Controllers
                 });
             }
 
-            var newSupport = new Support
-            {
-                Title = support.Title,
-                Content = support.Content,
-                IdAccount = Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? "")
-            };
-
-            await _supportRepository.InsertSupportAsync(newSupport);
+            var result = await _supportRepository.InsertSupportAsync(support, Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? ""));
 
             return Ok(new
             {
                 Message = "Insert Success",
-                support
+                result
             });
         }
 

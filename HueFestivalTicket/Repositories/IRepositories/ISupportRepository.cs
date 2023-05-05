@@ -9,7 +9,7 @@ namespace HueFestivalTicket.Repositories.IRepositories
         public Task<List<Support>> GetAllSupportAsync();
         public Task<Support?> GetSupportByIdAsync(Guid id);
         public Task<Support?> GetSupportByTitleAsync(string title);
-        public Task InsertSupportAsync(Support support);
+        public Task<Support> InsertSupportAsync(SupportDTO support, Guid idAccount);
         public Task UpdateSupportAsync(Support oldSupport, SupportDTO newSupport);
         public Task DeleteSupportAsync(Support support);
     }

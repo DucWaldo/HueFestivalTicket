@@ -12,6 +12,7 @@ namespace HueFestivalTicket.Helpers
             CreateMap<User, UserDTO>().ReverseMap();
             CreateMap<Event, EventDTO>().ReverseMap();
             CreateMap<ImageEvent, ImageEventDTO>().ReverseMap();
+            CreateMap<Support, SupportDTO>().ReverseMap();
         }
     }
 }

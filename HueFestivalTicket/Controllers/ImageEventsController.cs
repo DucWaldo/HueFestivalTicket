@@ -137,12 +137,9 @@ namespace HueFestivalTicket.Controllers
 
             await _imageEventRepository.DeleteImageEventAsync(id);
 
-            var getAll = await _imageEventRepository.GetAllImageEventsAsync();
-
             return Ok(new
             {
-                Message = "Delete Success",
-                getAll
+                Message = "Delete Success"
             });
         }
 

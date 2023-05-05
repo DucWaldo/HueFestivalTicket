@@ -134,10 +134,5 @@ namespace HueFestivalTicket.Controllers
                 Message = "Delete Success"
             });
         }
-
-        private bool EventExists(Guid id)
-        {
-            return (_context.Events?.Any(e => e.IdEvent == id)).GetValueOrDefault();
-        }
     }
 }

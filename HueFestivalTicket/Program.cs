@@ -72,6 +72,7 @@ builder.Services.AddScoped<IImageEventRepository, ImageEventRepository>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IAccountRepository, AccountRepository>();
 builder.Services.AddScoped<ITypeLocationRepository, TypeLocationRepository>();
+builder.Services.AddScoped<ISupportRepository, SupportRepository>();
 
 var app = builder.Build();
 

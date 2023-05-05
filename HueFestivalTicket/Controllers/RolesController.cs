@@ -127,11 +127,9 @@ namespace HueFestivalTicket.Controllers
 
             await _roleRepository.DeleteRoleAsync(name ?? "");
 
-            var result = await _roleRepository.GetAllRolesAsync();
             return Ok(new
             {
-                Message = $"Delete {name} success",
-                result
+                Message = $"Delete {name} success"
             });
         }
     }

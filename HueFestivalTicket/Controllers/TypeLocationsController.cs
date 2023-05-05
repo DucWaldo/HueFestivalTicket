@@ -142,7 +142,10 @@ namespace HueFestivalTicket.Controllers
 
             await _typeLocationRepository.DeleteTypeLocationAsync(typeLocation);
 
-            return NoContent();
+            return Ok(new
+            {
+                Message = "Delete Success"
+            });
         }
 
         private void DeleteFile(string? imageUrl)

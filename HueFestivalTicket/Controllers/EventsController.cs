@@ -44,7 +44,7 @@ namespace HueFestivalTicket.Controllers
             {
                 return Ok(new
                 {
-                    Message = $"Can't find event with {id}"
+                    Message = "This Event not found"
                 });
             }
 
@@ -61,7 +61,7 @@ namespace HueFestivalTicket.Controllers
             {
                 return Ok(new
                 {
-                    Message = $"Id {id} does not exist"
+                    Message = "This Event not found"
                 });
             }
 
@@ -129,7 +129,7 @@ namespace HueFestivalTicket.Controllers
             {
                 return Ok(new
                 {
-                    Message = $"Id {id} does not exist"
+                    Message = "This Event not found"
                 });
             }
 

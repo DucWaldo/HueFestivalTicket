@@ -36,7 +36,7 @@ namespace HueFestivalTicket.Repositories
 
         public async Task<List<Location>> GetAllLocationsAsync()
         {
-            return await GetAllAsync();
+            return await GetAllWithIncludesAsync(l => l.TypeLocation!);
         }
 
         public async Task<Location?> GetLocationByIdAsync(Guid id)

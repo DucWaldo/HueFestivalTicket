@@ -1,5 +1,6 @@
 ﻿using HueFestivalTicket.Contexts;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace HueFestivalTicket.Repositories.RepositoryService
 {
@@ -35,6 +36,18 @@ namespace HueFestivalTicket.Repositories.RepositoryService
         {
             _dbSet.Remove(entity);
             await _context.SaveChangesAsync();
+        }
+
+        public async Task<List<TEntity>> GetAllWithIncludesAsync(params Expression<Func<TEntity, object>>[] includeExpressions)
+        {
+            var query = _context.Set<TEntity>().AsQueryable();
+
+            if (includeExpressions != null)
+            {
+                query = includeExpressions.Aggregate(query, (current, includeExpression) => current.Include(includeExpression));
+            }
+
+            return await query.ToListAsync();
         }
 
         /*
@@ -83,6 +96,19 @@ namespace HueFestivalTicket.Repositories.RepositoryService
         public virtual void Save()
         {
             _dbContext.SaveChanges();
-        }*/
+        }
+        
+        public async Task<List<TEntity>> GetAllWithIncludesAsync(params Expression<Func<TEntity, object>>[] includeExpressions)
+        {
+            IQueryable<TEntity> query = _dbSet;
+
+            foreach (var include in includeExpressions)
+            {
+                query = query.Include(include);
+            }
+
+            return await query.ToListAsync();
+        }
+        */
     }
 }

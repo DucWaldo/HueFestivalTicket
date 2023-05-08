@@ -24,7 +24,7 @@ namespace HueFestivalTicket.Repositories
 
         public async Task<List<User>> GetAllUsersAsync()
         {
-            return await GetAllAsync();
+            return await GetAllWithIncludesAsync(u => u.Account!.Role!);
         }
 
         public async Task<User?> GetUserByIdAsync(Guid id)
@@ -33,9 +33,19 @@ namespace HueFestivalTicket.Repositories
             return user;
         }
 
-        public async Task InsertUserAsync(User user)
+        public async Task<User> InsertUserAsync(UserDTO user, Guid idAccount)
         {
-            await InsertAsync(user);
+            var newUser = new User
+            {
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                Email = user.Email,
+                PhoneNumber = user.PhoneNumber,
+                Organization = user.Organization,
+                IdAccount = idAccount
+            };
+            await InsertAsync(newUser);
+            return newUser;
         }
 
         public async Task UpdateUserAsync(UserDTO user, User users)

@@ -13,12 +13,14 @@ namespace HueFestivalTicket.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IWebHostEnvironment _environment;
         private readonly IImageEventRepository _imageEventRepository;
+        private readonly IEventRepository _eventRepository;
 
-        public ImageEventsController(ApplicationDbContext context, IWebHostEnvironment environment, IImageEventRepository imageEventRepository)
+        public ImageEventsController(ApplicationDbContext context, IWebHostEnvironment environment, IImageEventRepository imageEventRepository, IEventRepository eventRepository)
         {
             _context = context;
             _environment = environment;
             _imageEventRepository = imageEventRepository;
+            _eventRepository = eventRepository;
         }
 
         // GET: api/ImageEvents
@@ -46,7 +48,7 @@ namespace HueFestivalTicket.Controllers
             {
                 return Ok(new
                 {
-                    Message = $"This {id} already exists"
+                    Message = "This Image Event not found"
                 });
             }
             return File(imageEvent.ImageUrl ?? "", "image/jpeg");
@@ -57,14 +59,23 @@ namespace HueFestivalTicket.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutImageEvent(IFormFile file, Guid id)
         {
+
             var image = await _imageEventRepository.GetImageEventByIdAsync(id);
             if (image == null)
             {
                 return Ok(new
                 {
-                    Message = $"Id {id} not found"
+                    Message = "This Image Event not found"
                 });
             }
+            if (await _eventRepository.GetEventByIdAsync(image.IdEvent) == null)
+            {
+                return Ok(new
+                {
+                    Message = "This Event doesn't exist"
+                });
+            }
+
             DeleteFile(image.ImageUrl);
 
             var imageName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
@@ -88,6 +99,15 @@ namespace HueFestivalTicket.Controllers
             {
                 return Problem("Entity set 'ApplicationDbContext.ImageEvents'  is null.");
             }
+
+            if (await _eventRepository.GetEventByIdAsync(imageEvent.IdEvent) == null)
+            {
+                return Ok(new
+                {
+                    Message = "This Event doesn't exist"
+                });
+            }
+
             if (imageEvent.ImageUrl == null || imageEvent.ImageUrl.Count == 0)
             {
                 return Ok(new
@@ -127,7 +147,7 @@ namespace HueFestivalTicket.Controllers
             {
                 return Ok(new
                 {
-                    Message = $"Id {id} not found"
+                    Message = "This Image Event not found"
                 });
             }
 

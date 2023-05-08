@@ -1,6 +1,5 @@
 ﻿using HueFestivalTicket.Contexts;
 using HueFestivalTicket.Data;
-using HueFestivalTicket.Middlewares;
 using HueFestivalTicket.Models;
 using HueFestivalTicket.Repositories.IRepositories;
 using Microsoft.AspNetCore.Mvc;
@@ -16,12 +15,14 @@ namespace HueFestivalTicket.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IUserRepository _userRepository;
         private readonly IAccountRepository _accountRepository;
+        private readonly IRoleRepository _roleRepository;
 
-        public UsersController(ApplicationDbContext context, IUserRepository userRepository, IAccountRepository accountRepository)
+        public UsersController(ApplicationDbContext context, IUserRepository userRepository, IAccountRepository accountRepository, IRoleRepository roleRepository)
         {
             _context = context;
             _userRepository = userRepository;
             _accountRepository = accountRepository;
+            _roleRepository = roleRepository;
         }
 
         // GET: api/Users
@@ -49,7 +50,7 @@ namespace HueFestivalTicket.Controllers
             {
                 return Ok(new
                 {
-                    Message = $"Can't find user by {id}"
+                    Message = $"Can't find user"
                 });
             }
             return user;
@@ -88,9 +89,10 @@ namespace HueFestivalTicket.Controllers
             }
 
             await _userRepository.UpdateUserAsync(user, users);
-            await _context.SaveChangesAsync();
-
-            return Ok(users);
+            return Ok(new
+            {
+                Message = "Update Success"
+            });
         }
 
         // POST: api/Users
@@ -121,41 +123,21 @@ namespace HueFestivalTicket.Controllers
                 });
             }
 
-            var getRole = await _context.Roles.FirstOrDefaultAsync(r => r.Name == "User");
-            if (getRole == null)
+            var getRole = await _roleRepository.GetIdRoleByNameAsync("User");
+            if (getRole == Guid.Empty)
             {
                 return Ok(new
                 {
                     Message = "Role not found"
                 });
             }
-            var newAccount = new Account
-            {
-                Username = user.PhoneNumber,
-                Password = Generate.GetMD5Hash(user.PhoneNumber ?? ""),
-                IsActive = true,
-                TimeJoined = DateTime.UtcNow,
-                IdRole = getRole.IdRole
-            };
-            await _accountRepository.InsertAccountAsync(newAccount);
-            await _context.SaveChangesAsync();
-
-            var newUser = new User
-            {
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                Email = user.Email,
-                PhoneNumber = user.PhoneNumber,
-                Organization = user.Organization,
-                IdAccount = newAccount.IdAccount
-            };
-            await _userRepository.InsertUserAsync(newUser);
-            await _context.SaveChangesAsync();
+            var accountResult = await _accountRepository.InsertAccountAsync(user.PhoneNumber, getRole);
+            var userResult = await _userRepository.InsertUserAsync(user, accountResult.IdAccount);
 
             return Ok(new
             {
-                newUser,
-                newAccount
+                Message = "Insert Success",
+                userResult
             });
         }
 

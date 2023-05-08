@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using HueFestivalTicket.Contexts;
+﻿using HueFestivalTicket.Contexts;
+using HueFestivalTicket.Data;
 using HueFestivalTicket.Models;
+using HueFestivalTicket.Repositories.IRepositories;
+using Microsoft.AspNetCore.Mvc;
 
 namespace HueFestivalTicket.Controllers
 {
@@ -15,36 +11,44 @@ namespace HueFestivalTicket.Controllers
     public class EventLocationsController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
-
-        public EventLocationsController(ApplicationDbContext context)
+        private readonly IEventLocationRepository _eventLocationRepository;
+        private readonly IEventRepository _eventRepository;
+        private readonly ILocationRepository _locationRepository;
+        public EventLocationsController(ApplicationDbContext context, IEventLocationRepository eventLocationRepository, ILocationRepository locationRepository, IEventRepository eventRepository)
         {
             _context = context;
+            _eventLocationRepository = eventLocationRepository;
+            _locationRepository = locationRepository;
+            _eventRepository = eventRepository;
         }
 
         // GET: api/EventLocations
         [HttpGet]
         public async Task<ActionResult<IEnumerable<EventLocation>>> GetEventLocations()
         {
-          if (_context.EventLocations == null)
-          {
-              return NotFound();
-          }
-            return await _context.EventLocations.ToListAsync();
+            if (_context.EventLocations == null)
+            {
+                return NotFound();
+            }
+            return await _eventLocationRepository.GetAllEventLocationsAsync();
         }
 
         // GET: api/EventLocations/5
         [HttpGet("{id}")]
         public async Task<ActionResult<EventLocation>> GetEventLocation(Guid id)
         {
-          if (_context.EventLocations == null)
-          {
-              return NotFound();
-          }
-            var eventLocation = await _context.EventLocations.FindAsync(id);
+            if (_context.EventLocations == null)
+            {
+                return NotFound();
+            }
+            var eventLocation = await _eventLocationRepository.GetEventLocationByIdAsync(id);
 
             if (eventLocation == null)
             {
-                return NotFound();
+                return Ok(new
+                {
+                    Message = "This Event Location doesn't exist"
+                });
             }
 
             return eventLocation;
@@ -53,47 +57,89 @@ namespace HueFestivalTicket.Controllers
         // PUT: api/EventLocations/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutEventLocation(Guid id, EventLocation eventLocation)
+        public async Task<IActionResult> PutEventLocation(Guid id, EventLocationDTO eventLocation)
         {
-            if (id != eventLocation.IdEventLocation)
+            var oldEventLocation = await _eventLocationRepository.GetEventLocationByIdAsync(id);
+            if (oldEventLocation == null)
             {
-                return BadRequest();
-            }
-
-            _context.Entry(eventLocation).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!EventLocationExists(id))
+                return Ok(new
                 {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                    Message = "Event Location not found"
+                });
             }
 
-            return NoContent();
+            if (_eventRepository.GetEventByIdAsync(eventLocation.IdEvent) == null)
+            {
+                return Ok(new
+                {
+                    Message = "Event doesn't exist"
+                });
+            }
+
+            if (_locationRepository.GetLocationByIdAsync(eventLocation.IdLocation) == null)
+            {
+                return Ok(new
+                {
+                    Message = "Location doesn't exist"
+                });
+            }
+
+            var messageCheck = await _eventLocationRepository.CheckDateTimeEventLocationToUpdate(id, eventLocation);
+            if (messageCheck != string.Empty)
+            {
+                return Ok(new
+                {
+                    Message = messageCheck.ToString()
+                });
+            }
+
+            await _eventLocationRepository.UpdateEventLocationAsync(oldEventLocation, eventLocation);
+            return Ok(new
+            {
+                Message = "Update Success"
+            });
         }
 
         // POST: api/EventLocations
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<EventLocation>> PostEventLocation(EventLocation eventLocation)
+        public async Task<ActionResult<EventLocation>> PostEventLocation(EventLocationDTO eventLocation)
         {
-          if (_context.EventLocations == null)
-          {
-              return Problem("Entity set 'ApplicationDbContext.EventLocations'  is null.");
-          }
-            _context.EventLocations.Add(eventLocation);
-            await _context.SaveChangesAsync();
+            if (_context.EventLocations == null)
+            {
+                return Problem("Entity set 'ApplicationDbContext.EventLocations'  is null.");
+            }
 
-            return CreatedAtAction("GetEventLocation", new { id = eventLocation.IdEventLocation }, eventLocation);
+            var messageCheck = await _eventLocationRepository.CheckDateTimeEventLocation(eventLocation);
+            if (messageCheck != string.Empty)
+            {
+                return Ok(new
+                {
+                    Message = messageCheck.ToString()
+                });
+            }
+
+            if (_eventRepository.GetEventByIdAsync(eventLocation.IdEvent) == null)
+            {
+                return Ok(new
+                {
+                    Message = "Event doesn't exist"
+                });
+            }
+            if (_locationRepository.GetLocationByIdAsync(eventLocation.IdLocation) == null)
+            {
+                return Ok(new
+                {
+                    Message = "Location doesn't exist"
+                });
+            }
+
+            var result = await _eventLocationRepository.InsertEventLocationAsync(eventLocation);
+            return Ok(new
+            {
+                Message = "Insert Success",
+                result
+            });
         }
 
         // DELETE: api/EventLocations/5
@@ -104,21 +150,18 @@ namespace HueFestivalTicket.Controllers
             {
                 return NotFound();
             }
-            var eventLocation = await _context.EventLocations.FindAsync(id);
+            var eventLocation = await _eventLocationRepository.GetEventLocationByIdAsync(id);
             if (eventLocation == null)
             {
-                return NotFound();
+                return Ok(new
+                {
+                    Message = "This Event Location not found"
+                });
             }
 
-            _context.EventLocations.Remove(eventLocation);
-            await _context.SaveChangesAsync();
+            await _eventLocationRepository.DeleteEventLocationAsync(eventLocation);
 
             return NoContent();
-        }
-
-        private bool EventLocationExists(Guid id)
-        {
-            return (_context.EventLocations?.Any(e => e.IdEventLocation == id)).GetValueOrDefault();
         }
     }
 }

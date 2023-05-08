@@ -46,7 +46,7 @@ namespace HueFestivalTicket.Controllers
             {
                 return Ok(new
                 {
-                    Message = $"Id {id} doesn't exist"
+                    Message = "This Support not found"
                 });
             }
 
@@ -63,7 +63,7 @@ namespace HueFestivalTicket.Controllers
             {
                 return Ok(new
                 {
-                    Message = $"Id {id} doesn't exist"
+                    Message = "This Support not found"
                 });
             }
 
@@ -126,7 +126,7 @@ namespace HueFestivalTicket.Controllers
             {
                 return Ok(new
                 {
-                    Message = $"Id {id} doesn't exist"
+                    Message = "This Support not found"
                 });
             }
 

@@ -52,5 +52,19 @@ namespace HueFestivalTicket.Repositories
                 await UpdateAsync(existingRole);
             }
         }
+
+        public async Task<Guid> GetIdRoleByNameAsync(string name)
+        {
+            var roles = await _dbSet.FirstOrDefaultAsync(r => r.Name == name);
+            if (roles != null)
+            {
+                return roles.IdRole;
+            }
+            else
+            {
+                return Guid.Empty;
+            }
+
+        }
     }
 }

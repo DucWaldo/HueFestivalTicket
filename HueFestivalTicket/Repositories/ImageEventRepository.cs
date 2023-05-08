@@ -28,8 +28,7 @@ namespace HueFestivalTicket.Repositories
 
         public async Task<List<ImageEvent>> GetAllImageEventsAsync()
         {
-            var imageEvents = await GetAllAsync();
-            return imageEvents;
+            return await GetAllWithIncludesAsync(ie => ie.Event!);
         }
 
         public async Task<ImageEvent?> GetImageEventByIdAsync(Guid id)

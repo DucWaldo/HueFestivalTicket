@@ -60,7 +60,7 @@ namespace HueFestivalTicket.Controllers
             {
                 return Ok(new
                 {
-                    Message = $"Id {id} does not exist"
+                    Message = "This Type Location not found"
                 });
             }
             DeleteFile(check.ImageUrl);
@@ -136,7 +136,7 @@ namespace HueFestivalTicket.Controllers
             {
                 return Ok(new
                 {
-                    Message = $"Id {id} does not exist"
+                    Message = "This Type Location not found"
                 });
             }
 

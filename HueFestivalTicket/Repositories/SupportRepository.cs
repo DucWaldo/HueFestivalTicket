@@ -23,7 +23,7 @@ namespace HueFestivalTicket.Repositories
 
         public async Task<List<Support>> GetAllSupportAsync()
         {
-            return await GetAllAsync();
+            return await GetAllWithIncludesAsync(s => s.Account!.Role!);
         }
 
         public async Task<Support?> GetSupportByIdAsync(Guid id)

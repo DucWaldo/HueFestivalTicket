@@ -46,7 +46,7 @@ namespace HueFestivalTicket.Controllers
             {
                 return Ok(new
                 {
-                    Message = $"Id {id} doesn't exist"
+                    Message = "This Location not found"
                 });
             }
 
@@ -63,7 +63,7 @@ namespace HueFestivalTicket.Controllers
             {
                 return Ok(new
                 {
-                    Message = $"Id {id} doesn't exist"
+                    Message = "This Location not found"
                 });
             }
             if (await _typeLocationRepository.GetTypeLocationByIdAsync(newLocation.IdTypeLocation) == null)
@@ -129,7 +129,7 @@ namespace HueFestivalTicket.Controllers
             {
                 return Ok(new
                 {
-                    Message = $"Id {id} doesn't exist"
+                    Message = "This Location not found"
                 });
             }
 
@@ -137,7 +137,7 @@ namespace HueFestivalTicket.Controllers
 
             return Ok(new
             {
-                Message = $"Delete Success"
+                Message = "Delete Success"
             });
         }
     }

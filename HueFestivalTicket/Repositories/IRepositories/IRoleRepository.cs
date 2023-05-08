@@ -8,6 +8,7 @@ namespace HueFestivalTicket.Repositories.IRepositories
     {
         public Task<List<RoleDTO>> GetAllRolesAsync();
         public Task<RoleDTO> GetRoleByNameAsync(string name);
+        public Task<Guid> GetIdRoleByNameAsync(string name);
         public Task InsertRoleAsync(RoleDTO role);
         public Task UpdateRoleAsync(string oldRole, RoleDTO role);
         public Task DeleteRoleAsync(string name);

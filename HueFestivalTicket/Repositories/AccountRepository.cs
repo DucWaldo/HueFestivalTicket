@@ -1,4 +1,5 @@
 ﻿using HueFestivalTicket.Contexts;
+using HueFestivalTicket.Middlewares;
 using HueFestivalTicket.Models;
 using HueFestivalTicket.Repositories.IRepositories;
 using HueFestivalTicket.Repositories.RepositoryService;
@@ -25,12 +26,21 @@ namespace HueFestivalTicket.Repositories
 
         public async Task<List<Account>> GetAllAccountAsync()
         {
-            return await GetAllAsync();
+            return await GetAllWithIncludesAsync(acc => acc.Role!);
         }
 
-        public async Task InsertAccountAsync(Account account)
+        public async Task<Account> InsertAccountAsync(string? account, Guid role)
         {
-            await InsertAsync(account);
+            var newAccount = new Account
+            {
+                Username = account,
+                Password = Generate.GetMD5Hash(account ?? ""),
+                IsActive = true,
+                TimeJoined = DateTime.UtcNow,
+                IdRole = role
+            };
+            await InsertAsync(newAccount);
+            return newAccount;
         }
     }
 }

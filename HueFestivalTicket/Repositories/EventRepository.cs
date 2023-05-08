@@ -30,7 +30,6 @@ namespace HueFestivalTicket.Repositories
         public async Task<List<Event>> GetAllEventsAsync()
         {
             var events = await GetAllAsync();
-            //return _mapper.Map<List<EventDTO>>(events);
             return events;
         }
 

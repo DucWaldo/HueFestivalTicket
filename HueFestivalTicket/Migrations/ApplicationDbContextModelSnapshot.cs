@@ -50,7 +50,7 @@ namespace HueFestivalTicket.Migrations
 
                     b.HasIndex("IdRole");
 
-                    b.ToTable("Account");
+                    b.ToTable("Account", (string)null);
                 });
 
             modelBuilder.Entity("HueFestivalTicket.Models.Checkin", b =>
@@ -77,7 +77,7 @@ namespace HueFestivalTicket.Migrations
 
                     b.HasIndex("IdTicket");
 
-                    b.ToTable("Checkin");
+                    b.ToTable("Checkin", (string)null);
                 });
 
             modelBuilder.Entity("HueFestivalTicket.Models.Customer", b =>
@@ -108,7 +108,7 @@ namespace HueFestivalTicket.Migrations
 
                     b.HasKey("IdCustomer");
 
-                    b.ToTable("Customer");
+                    b.ToTable("Customer", (string)null);
                 });
 
             modelBuilder.Entity("HueFestivalTicket.Models.Event", b =>
@@ -133,7 +133,7 @@ namespace HueFestivalTicket.Migrations
 
                     b.HasKey("IdEvent");
 
-                    b.ToTable("Event");
+                    b.ToTable("Event", (string)null);
                 });
 
             modelBuilder.Entity("HueFestivalTicket.Models.EventLocation", b =>
@@ -169,7 +169,7 @@ namespace HueFestivalTicket.Migrations
 
                     b.HasIndex("IdLocation");
 
-                    b.ToTable("EventLocation");
+                    b.ToTable("EventLocation", (string)null);
                 });
 
             modelBuilder.Entity("HueFestivalTicket.Models.ImageEvent", b =>
@@ -189,7 +189,7 @@ namespace HueFestivalTicket.Migrations
 
                     b.HasIndex("IdEvent");
 
-                    b.ToTable("ImageEvent");
+                    b.ToTable("ImageEvent", (string)null);
                 });
 
             modelBuilder.Entity("HueFestivalTicket.Models.Location", b =>
@@ -218,7 +218,7 @@ namespace HueFestivalTicket.Migrations
 
                     b.HasIndex("IdTypeLocation");
 
-                    b.ToTable("Location");
+                    b.ToTable("Location", (string)null);
                 });
 
             modelBuilder.Entity("HueFestivalTicket.Models.ManagerToken", b =>
@@ -252,7 +252,7 @@ namespace HueFestivalTicket.Migrations
 
                     b.HasIndex("IdAccount");
 
-                    b.ToTable("ManagerToken");
+                    b.ToTable("ManagerToken", (string)null);
                 });
 
             modelBuilder.Entity("HueFestivalTicket.Models.News", b =>
@@ -282,7 +282,7 @@ namespace HueFestivalTicket.Migrations
 
                     b.HasIndex("IdAccount");
 
-                    b.ToTable("News");
+                    b.ToTable("News", (string)null);
                 });
 
             modelBuilder.Entity("HueFestivalTicket.Models.PriceTicket", b =>
@@ -306,7 +306,7 @@ namespace HueFestivalTicket.Migrations
 
                     b.HasIndex("IdTypeTicket");
 
-                    b.ToTable("PriceTicket");
+                    b.ToTable("PriceTicket", (string)null);
                 });
 
             modelBuilder.Entity("HueFestivalTicket.Models.Role", b =>
@@ -322,7 +322,7 @@ namespace HueFestivalTicket.Migrations
 
                     b.HasKey("IdRole");
 
-                    b.ToTable("Role");
+                    b.ToTable("Role", (string)null);
                 });
 
             modelBuilder.Entity("HueFestivalTicket.Models.Support", b =>
@@ -347,7 +347,7 @@ namespace HueFestivalTicket.Migrations
 
                     b.HasIndex("IdAccount");
 
-                    b.ToTable("Support");
+                    b.ToTable("Support", (string)null);
                 });
 
             modelBuilder.Entity("HueFestivalTicket.Models.Ticket", b =>
@@ -384,7 +384,7 @@ namespace HueFestivalTicket.Migrations
 
                     b.HasIndex("IdTypeTicket");
 
-                    b.ToTable("Ticket");
+                    b.ToTable("Ticket", (string)null);
                 });
 
             modelBuilder.Entity("HueFestivalTicket.Models.TypeLocation", b =>
@@ -402,7 +402,7 @@ namespace HueFestivalTicket.Migrations
 
                     b.HasKey("IdTypeLocation");
 
-                    b.ToTable("TypeLocation");
+                    b.ToTable("TypeLocation", (string)null);
                 });
 
             modelBuilder.Entity("HueFestivalTicket.Models.TypeTicket", b =>
@@ -418,7 +418,7 @@ namespace HueFestivalTicket.Migrations
 
                     b.HasKey("IdTypeTicket");
 
-                    b.ToTable("TypeTicket");
+                    b.ToTable("TypeTicket", (string)null);
                 });
 
             modelBuilder.Entity("HueFestivalTicket.Models.User", b =>
@@ -454,7 +454,7 @@ namespace HueFestivalTicket.Migrations
 
                     b.HasIndex("IdAccount");
 
-                    b.ToTable("User");
+                    b.ToTable("User", (string)null);
                 });
 
             modelBuilder.Entity("HueFestivalTicket.Models.Account", b =>

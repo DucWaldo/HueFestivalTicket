@@ -8,7 +8,7 @@ namespace HueFestivalTicket.Models
     {
         [Key]
         public Guid IdPriceTicket { get; set; }
-        public Decimal Price { get; set; }
+        public decimal Price { get; set; }
         public Guid IdEventLocation { get; set; }
         public Guid IdTypeTicket { get; set; }
 

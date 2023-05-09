@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using HueFestivalTicket.Contexts;
+using HueFestivalTicket.Data;
 using HueFestivalTicket.Models;
 using HueFestivalTicket.Repositories.IRepositories;
 using HueFestivalTicket.Repositories.RepositoryService;
@@ -11,19 +12,19 @@ namespace HueFestivalTicket.Repositories
     {
         private readonly ApplicationDbContext _context;
         private readonly IMapper _mapper;
-        public ImageEventRepository(ApplicationDbContext context, IMapper mapper) : base(context)
+        private readonly IWebHostEnvironment _environment;
+
+        public ImageEventRepository(ApplicationDbContext context, IMapper mapper, IWebHostEnvironment environment) : base(context)
         {
             _context = context;
             _mapper = mapper;
+            _environment = environment;
         }
 
-        public async Task DeleteImageEventAsync(Guid id)
+        public async Task DeleteImageEventAsync(ImageEvent imageEvent)
         {
-            var imageEvent = await _dbSet.FirstOrDefaultAsync(ie => ie.IdImageEvent == id);
-            if (imageEvent != null)
-            {
-                await DeleteAsync(imageEvent);
-            }
+            DeleteFile(imageEvent.ImageUrl);
+            await DeleteAsync(imageEvent);
         }
 
         public async Task<List<ImageEvent>> GetAllImageEventsAsync()
@@ -43,21 +44,58 @@ namespace HueFestivalTicket.Repositories
             return imageEvent;
         }
 
-        public async Task InsertImageEventAsync(ImageEvent imageEvent)
+        public async Task<List<ImageEvent>> InsertImageEventAsync(ImageEventDTO imageEvent)
         {
-            await InsertAsync(imageEvent);
+            List<ImageEvent> imageEvents = new List<ImageEvent>();
+            foreach (var file in imageEvent.ImageUrl!)
+            {
+                var imageName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+                InsertFile(file, imageName);
+                var newImageEvent = new ImageEvent
+                {
+                    ImageUrl = "/images/" + imageName,
+                    IdEvent = imageEvent.IdEvent
+                };
+                await InsertAsync(newImageEvent);
+                imageEvents.Add(newImageEvent);
+            }
+            return imageEvents;
         }
 
-        public async Task UpdateImageEventAsync(Guid id, string url)
+        public async Task UpdateImageEventAsync(ImageEvent oldImageEvent, IFormFile file)
         {
-            var existingImageEvent = await _dbSet.FirstOrDefaultAsync(ie => ie.IdImageEvent == id);
+            DeleteFile(oldImageEvent.ImageUrl);
 
-            if (existingImageEvent != null)
+            var imageName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
+            InsertFile(file, imageName);
+
+            var url = "/images/" + imageName;
+            oldImageEvent.ImageUrl = url;
+
+            await UpdateAsync(oldImageEvent);
+        }
+
+        private void DeleteFile(string? imageUrl)
+        {
+            var imagePath = _environment.WebRootPath + imageUrl;
+            if (System.IO.File.Exists(imagePath))
             {
-                existingImageEvent.ImageUrl = url;
-                await UpdateAsync(existingImageEvent);
+                System.IO.File.Delete(imagePath);
             }
+        }
 
+        private async void InsertFile(IFormFile file, string imageName)
+        {
+            var newImagePath = _environment.WebRootPath + "\\images\\";
+            if (!Directory.Exists(newImagePath))
+            {
+                Directory.CreateDirectory(newImagePath);
+            }
+            using (FileStream stream = System.IO.File.Create(newImagePath + imageName))
+            {
+                await file.CopyToAsync(stream);
+                stream.Flush();
+            }
         }
     }
 }

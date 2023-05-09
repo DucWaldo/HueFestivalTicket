@@ -1,4 +1,5 @@
-﻿using HueFestivalTicket.Models;
+﻿using HueFestivalTicket.Data;
+using HueFestivalTicket.Models;
 using HueFestivalTicket.Repositories.RepositoryService;
 
 namespace HueFestivalTicket.Repositories.IRepositories
@@ -7,9 +8,10 @@ namespace HueFestivalTicket.Repositories.IRepositories
     {
         public Task<List<TypeLocation>> GetAllTypeLocationAsync();
         public Task<TypeLocation?> GetTypeLocationByIdAsync(Guid id);
-        public Task<TypeLocation> GetTypeLocationByNameAsync(string name);
-        public Task InsertTypeLocationAsync(TypeLocation typeLocation);
-        public Task UpdateTypeLocationAsync(TypeLocation typeLocation);
+        public Task<TypeLocation?> GetTypeLocationByNameAsync(string name);
+        public Task<TypeLocation> InsertTypeLocationAsync(TypeLocationDTO typeLocation);
+        public Task UpdateTypeLocationAsync(TypeLocation oldTypeLocation, TypeLocationDTO newTypeLocation);
         public Task DeleteTypeLocationAsync(TypeLocation typeLocation);
+        public Task<bool> CheckNameTypeLocation(string name, Guid id);
     }
 }

@@ -60,15 +60,15 @@ namespace HueFestivalTicket.Controllers
         public async Task<IActionResult> PutImageEvent(IFormFile file, Guid id)
         {
 
-            var image = await _imageEventRepository.GetImageEventByIdAsync(id);
-            if (image == null)
+            var oldImageEvent = await _imageEventRepository.GetImageEventByIdAsync(id);
+            if (oldImageEvent == null)
             {
                 return Ok(new
                 {
                     Message = "This Image Event not found"
                 });
             }
-            if (await _eventRepository.GetEventByIdAsync(image.IdEvent) == null)
+            if (await _eventRepository.GetEventByIdAsync(oldImageEvent.IdEvent) == null)
             {
                 return Ok(new
                 {
@@ -76,13 +76,7 @@ namespace HueFestivalTicket.Controllers
                 });
             }
 
-            DeleteFile(image.ImageUrl);
-
-            var imageName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-            InsertFile(file, imageName);
-
-            var url = "/images/" + imageName;
-            await _imageEventRepository.UpdateImageEventAsync(id, url);
+            await _imageEventRepository.UpdateImageEventAsync(oldImageEvent, file);
 
             return Ok(new
             {
@@ -116,21 +110,11 @@ namespace HueFestivalTicket.Controllers
                 });
             }
 
-            foreach (var file in imageEvent.ImageUrl)
-            {
-                var imageName = Guid.NewGuid().ToString() + Path.GetExtension(file.FileName);
-                InsertFile(file, imageName);
-                var image = new ImageEvent
-                {
-                    ImageUrl = "/images/" + imageName,
-                    IdEvent = imageEvent.IdEvent
-                };
-                await _imageEventRepository.InsertImageEventAsync(image);
-            }
+            var result = await _imageEventRepository.InsertImageEventAsync(imageEvent);
             return Ok(new
             {
                 Message = "Insert Success",
-                imageEvent
+                result
             });
         }
 
@@ -151,37 +135,12 @@ namespace HueFestivalTicket.Controllers
                 });
             }
 
-            DeleteFile(imageEvent.ImageUrl);
-
-            await _imageEventRepository.DeleteImageEventAsync(id);
+            await _imageEventRepository.DeleteImageEventAsync(imageEvent);
 
             return Ok(new
             {
                 Message = "Delete Success"
             });
-        }
-
-        private void DeleteFile(string? imageUrl)
-        {
-            var imagePath = _environment.WebRootPath + imageUrl;
-            if (System.IO.File.Exists(imagePath))
-            {
-                System.IO.File.Delete(imagePath);
-            }
-        }
-
-        private async void InsertFile(IFormFile file, string imageName)
-        {
-            var newImagePath = _environment.WebRootPath + "\\images\\";
-            if (!Directory.Exists(newImagePath))
-            {
-                Directory.CreateDirectory(newImagePath);
-            }
-            using (FileStream stream = System.IO.File.Create(newImagePath + imageName))
-            {
-                await file.CopyToAsync(stream);
-                stream.Flush();
-            }
         }
     }
 }

@@ -75,6 +75,7 @@ builder.Services.AddScoped<ITypeLocationRepository, TypeLocationRepository>();
 builder.Services.AddScoped<ISupportRepository, SupportRepository>();
 builder.Services.AddScoped<ILocationRepository, LocationRepository>();
 builder.Services.AddScoped<IEventLocationRepository, EventLocationRepository>();
+builder.Services.AddScoped<INewsRepository, NewsRepository>();
 
 var app = builder.Build();
 

@@ -36,15 +36,13 @@ namespace HueFestivalTicket.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<TypeLocation>> GetTypeLocation(Guid id)
         {
-            if (_context.TypeLocations == null)
-            {
-                return NotFound();
-            }
-            var typeLocation = await _context.TypeLocations.FindAsync(id);
-
+            var typeLocation = await _typeLocationRepository.GetTypeLocationByIdAsync(id);
             if (typeLocation == null)
             {
-                return NotFound();
+                return Ok(new
+                {
+                    Message = "This Type Location doesn't exist"
+                });
             }
 
             return typeLocation;
@@ -55,16 +53,21 @@ namespace HueFestivalTicket.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutTypeLocation(Guid id, [FromForm] TypeLocationDTO typeLocation)
         {
-            var check = await _typeLocationRepository.GetTypeLocationByIdAsync(id);
-            if (check == null)
+            var oldTypeLocation = await _typeLocationRepository.GetTypeLocationByIdAsync(id);
+            if (oldTypeLocation == null)
             {
                 return Ok(new
                 {
                     Message = "This Type Location not found"
                 });
             }
-            DeleteFile(check.ImageUrl);
-
+            if (typeLocation.Name == null || await _typeLocationRepository.CheckNameTypeLocation(typeLocation.Name, oldTypeLocation.IdTypeLocation) == false)
+            {
+                return Ok(new
+                {
+                    Message = "Name Type Location is empty or already exist"
+                });
+            }
             if (typeLocation.ImageUrl == null)
             {
                 return Ok(new
@@ -73,18 +76,10 @@ namespace HueFestivalTicket.Controllers
                 });
             }
 
-            var imageName = Guid.NewGuid().ToString() + Path.GetExtension(typeLocation.ImageUrl.FileName);
-            InsertFile(typeLocation.ImageUrl, imageName);
-            var url = "/images/" + imageName;
-
-            check.ImageUrl = url;
-            check.Name = typeLocation.Name;
-
-            await _typeLocationRepository.UpdateTypeLocationAsync(check);
+            await _typeLocationRepository.UpdateTypeLocationAsync(oldTypeLocation, typeLocation);
             return Ok(new
             {
-                Message = "Update Success",
-                check
+                Message = "Update Success"
             });
         }
 
@@ -93,11 +88,13 @@ namespace HueFestivalTicket.Controllers
         [HttpPost]
         public async Task<ActionResult<TypeLocation>> PostTypeLocation([FromForm] TypeLocationDTO typeLocation)
         {
-            if (_context.TypeLocations == null)
+            if (typeLocation.Name == null || await _typeLocationRepository.GetTypeLocationByNameAsync(typeLocation.Name) != null)
             {
-                return Problem("Entity set 'ApplicationDbContext.TypeLocations'  is null.");
+                return Ok(new
+                {
+                    Message = "Name Type Location is empty or already exist"
+                });
             }
-
             if (typeLocation.ImageUrl == null)
             {
                 return Ok(new
@@ -106,20 +103,12 @@ namespace HueFestivalTicket.Controllers
                 });
             }
 
-            var imageName = Guid.NewGuid().ToString() + Path.GetExtension(typeLocation.ImageUrl.FileName);
-            InsertFile(typeLocation.ImageUrl, imageName);
-
-            var newTypeLocation = new TypeLocation
-            {
-                Name = typeLocation.Name,
-                ImageUrl = "/images/" + imageName,
-            };
-
-            await _typeLocationRepository.InsertTypeLocationAsync(newTypeLocation);
+            var result = await _typeLocationRepository.InsertTypeLocationAsync(typeLocation);
 
             return Ok(new
             {
-                typeLocation
+                Message = "Insert Success",
+                result
             });
         }
 
@@ -127,10 +116,6 @@ namespace HueFestivalTicket.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteTypeLocation(Guid id)
         {
-            if (_context.TypeLocations == null)
-            {
-                return NotFound();
-            }
             var typeLocation = await _typeLocationRepository.GetTypeLocationByIdAsync(id);
             if (typeLocation == null)
             {
@@ -146,29 +131,6 @@ namespace HueFestivalTicket.Controllers
             {
                 Message = "Delete Success"
             });
-        }
-
-        private void DeleteFile(string? imageUrl)
-        {
-            var imagePath = _environment.WebRootPath + imageUrl;
-            if (System.IO.File.Exists(imagePath))
-            {
-                System.IO.File.Delete(imagePath);
-            }
-        }
-
-        private async void InsertFile(IFormFile file, string imageName)
-        {
-            var newImagePath = _environment.WebRootPath + "\\images\\";
-            if (!Directory.Exists(newImagePath))
-            {
-                Directory.CreateDirectory(newImagePath);
-            }
-            using (FileStream stream = System.IO.File.Create(newImagePath + imageName))
-            {
-                await file.CopyToAsync(stream);
-                stream.Flush();
-            }
         }
     }
 }

@@ -78,6 +78,9 @@ builder.Services.AddScoped<IEventLocationRepository, EventLocationRepository>();
 builder.Services.AddScoped<INewsRepository, NewsRepository>();
 builder.Services.AddScoped<ITypeTicketRepository, TypeTicketRepository>();
 builder.Services.AddScoped<IPriceTicketRepository, PriceTicketRepository>();
+builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
+builder.Services.AddScoped<IInvoiceRepository, InvoiceRepository>();
+builder.Services.AddScoped<ITicketRepository, TicketRepository>();
 
 var app = builder.Build();
 

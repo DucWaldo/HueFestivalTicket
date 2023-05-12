@@ -26,7 +26,7 @@ namespace HueFestivalTicket.Repositories
 
         public async Task<EventLocation?> GetEventLocationByIdAsync(Guid id)
         {
-            var result = await _dbSet.FirstOrDefaultAsync(el => el.IdEventLocation == id);
+            var result = await _dbSet.Include(el => el.Event).Include(el => el.Location!.TypeLocation).FirstOrDefaultAsync(el => el.IdEventLocation == id);
             return result;
         }
 
@@ -79,6 +79,16 @@ namespace HueFestivalTicket.Repositories
             {
                 return "Unable to start at this time at this location";
             }
+            var checkDateEnd = await _dbSet.FirstOrDefaultAsync(cde => cde.DateStart <= dEnd && cde.DateEnd >= dEnd && cde.IdLocation == eventLocation.IdLocation);
+            if (checkDateEnd != null)
+            {
+                return "Unable to end at this time at this location";
+            }
+            var checkStartEnd = await _dbSet.FirstOrDefaultAsync(cse => cse.DateStart >= dStart && cse.DateEnd <= dEnd && cse.IdLocation == eventLocation.IdLocation);
+            if (checkStartEnd != null)
+            {
+                return "Date Invalid because there is an event location within that time period";
+            }
             if (dStart <= DateTime.UtcNow)
             {
                 return "DateStart Invalid";
@@ -102,6 +112,11 @@ namespace HueFestivalTicket.Repositories
 
             var checkDateStart = await _dbSet.FirstOrDefaultAsync(cds => cds.DateStart <= dStart && cds.DateEnd >= dStart && cds.IdLocation == eventLocation.IdLocation && cds.IdEventLocation != id);
             if (checkDateStart != null)
+            {
+                return "Unable to start at this time at this location";
+            }
+            var checkDateEnd = await _dbSet.FirstOrDefaultAsync(cds => cds.DateStart <= dEnd && cds.DateEnd >= dEnd && cds.IdLocation == eventLocation.IdLocation && cds.IdEventLocation != id);
+            if (checkDateEnd != null)
             {
                 return "Unable to start at this time at this location";
             }

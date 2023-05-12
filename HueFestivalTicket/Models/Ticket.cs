@@ -12,18 +12,19 @@ namespace HueFestivalTicket.Models
         public string? TicketNumber { get; set; }
         [Required]
         public string? QRCode { get; set; }
-        public Decimal Price { get; set; }
+        public DateTime TimeCreate { get; set; }
+        public decimal Price { get; set; }
         public Guid IdEventLocation { get; set; }
-        public Guid IdCustomer { get; set;}
         public Guid IdTypeTicket { get; set; }
+        public Guid IdInvoice { get; set; }
 
         [ForeignKey("IdEventLocation")]
         public EventLocation? EventLocation { get; set; }
 
-        [ForeignKey("IdCustomer")]
-        public Customer? Customer { get; set;}
-
         [ForeignKey("IdTypeTicket")]
         public TypeTicket? TypeTicket { get; set; }
+
+        [ForeignKey("IdInvoice")]
+        public Invoice? Invoice { get; set; }
     }
 }

@@ -15,6 +15,7 @@ namespace HueFestivalTicket.Contexts
         public DbSet<Event> Events { get; set; }
         public DbSet<EventLocation> EventLocations { get; set; }
         public DbSet<ImageEvent> ImageEvents { get; set; }
+        public DbSet<Invoice> Invoices { get; set; }
         public DbSet<Location> Locations { get; set; }
         public DbSet<News> News { get; set; }
         public DbSet<PriceTicket> PriceTickets { get; set; }

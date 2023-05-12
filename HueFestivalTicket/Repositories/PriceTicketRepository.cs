@@ -49,6 +49,12 @@ namespace HueFestivalTicket.Repositories
             return priceTicket;
         }
 
+        public async Task<PriceTicket?> GetPriceTicketByIdEventLocationAndIdTypeTicketAsync(Guid idEventLocation, Guid idTypeTicket)
+        {
+            var priceTicket = await _dbSet.FirstOrDefaultAsync(pt => pt.IdEventLocation == idEventLocation && pt.IdTypeTicket == idTypeTicket);
+            return priceTicket;
+        }
+
         public async Task<PriceTicket> InsertPriceTicketAsync(PriceTicketDTO priceTicket, decimal price)
         {
             var newPriceTicket = new PriceTicket()

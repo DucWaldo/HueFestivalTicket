@@ -36,6 +36,13 @@ namespace HueFestivalTicket.Middlewares
                     Message = "Invalid username/password"
                 });
             }
+            if (accountLogin.IsActive == false)
+            {
+                return Ok(new
+                {
+                    Message = "This Account has been locked"
+                });
+            }
 
             var rolename = await _context.Roles.SingleOrDefaultAsync(x => x.IdRole == accountLogin.IdRole);
             if (rolename == null)
@@ -48,7 +55,8 @@ namespace HueFestivalTicket.Middlewares
 
             return Ok(new
             {
-                token = await CreateToken(accountLogin, rolename)
+                Message = "Login Success",
+                Token = await CreateToken(accountLogin, rolename)
             });
         }
 

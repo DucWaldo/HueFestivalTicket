@@ -15,6 +15,8 @@ namespace HueFestivalTicket.Helpers
             CreateMap<Support, SupportDTO>().ReverseMap();
             CreateMap<Location, LocationDTO>().ReverseMap();
             CreateMap<Account, AccountDTO>().ReverseMap();
+            CreateMap<Customer, CustomerDTO>().ReverseMap();
+            CreateMap<Invoice, InvoiceDTO>().ReverseMap();
         }
     }
 }

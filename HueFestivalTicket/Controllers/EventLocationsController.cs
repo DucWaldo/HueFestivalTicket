@@ -68,7 +68,8 @@ namespace HueFestivalTicket.Controllers
                 });
             }
 
-            if (_eventRepository.GetEventByIdAsync(eventLocation.IdEvent) == null)
+            var eventCheck = await _eventRepository.GetEventByIdAsync(eventLocation.IdEvent);
+            if (eventCheck == null)
             {
                 return Ok(new
                 {
@@ -81,6 +82,21 @@ namespace HueFestivalTicket.Controllers
                 return Ok(new
                 {
                     Message = "Location doesn't exist"
+                });
+            }
+
+            if (eventCheck.StatusTicket == false && (eventLocation.NumberSlot > 0 || eventLocation.Price > 0))
+            {
+                return Ok(new
+                {
+                    Message = "This Event doesn't sell tickets, please enter the number slot = 0 and price = 0"
+                });
+            }
+            if (eventCheck.StatusTicket == true && (eventLocation.NumberSlot <= 0 || eventLocation.Price <= 0))
+            {
+                return Ok(new
+                {
+                    Message = "Please enter number slot or price"
                 });
             }
 
@@ -119,18 +135,33 @@ namespace HueFestivalTicket.Controllers
                 });
             }
 
-            if (_eventRepository.GetEventByIdAsync(eventLocation.IdEvent) == null)
+            var eventCheck = await _eventRepository.GetEventByIdAsync(eventLocation.IdEvent);
+            if (eventCheck == null)
             {
                 return Ok(new
                 {
                     Message = "Event doesn't exist"
                 });
             }
-            if (_locationRepository.GetLocationByIdAsync(eventLocation.IdLocation) == null)
+            if (await _locationRepository.GetLocationByIdAsync(eventLocation.IdLocation) == null)
             {
                 return Ok(new
                 {
                     Message = "Location doesn't exist"
+                });
+            }
+            if (eventCheck.StatusTicket == false && (eventLocation.NumberSlot > 0 || eventLocation.Price > 0))
+            {
+                return Ok(new
+                {
+                    Message = "This Event doesn't sell tickets, please enter the number slot = 0 and price = 0"
+                });
+            }
+            if (eventCheck.StatusTicket == true && (eventLocation.NumberSlot <= 0 || eventLocation.Price <= 0))
+            {
+                return Ok(new
+                {
+                    Message = "Please enter number slot or price"
                 });
             }
 

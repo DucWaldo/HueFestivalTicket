@@ -97,11 +97,18 @@ namespace HueFestivalTicket.Controllers
                     Message = "Event Location doesn't exist"
                 });
             }
+            if (eventLocation.Price == 0)
+            {
+                return Ok(new
+                {
+                    Message = "This is free event"
+                });
+            }
             if (priceTicket.Price < 0 || priceTicket.IdEventLocation == Guid.Empty || priceTicket.IdTypeTicket == Guid.Empty)
             {
                 return Ok(new
                 {
-                    Message = "Please Enter All Infor"
+                    Message = "Please Enter All Info"
                 });
             }
             if (await _typeTicketRepository.GetTypeTicketByIdAsync(priceTicket.IdTypeTicket) == null)

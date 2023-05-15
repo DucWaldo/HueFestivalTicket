@@ -8,6 +8,7 @@ namespace HueFestivalTicket.Repositories.IRepositories
     {
         public Task<List<Invoice>> GetAllInvoiceAsync();
         public Task<Invoice?> GetInvoiceByIdAsync(Guid id);
+        public Task<List<Invoice>> GetInvoiceByIdCustomerAsync(Customer customer);
         public Task<Invoice> InsertInvoiceAsync(InvoiceDTO invoice);
         public Task UpdateInvoiceAsync(Invoice oldInvoice, InvoiceDTO newInvoice);
         public Task DeleteInvoiceAsync(Invoice invoice);

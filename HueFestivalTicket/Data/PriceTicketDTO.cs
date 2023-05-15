@@ -5,5 +5,6 @@
         public decimal Price { get; set; }
         public Guid IdEventLocation { get; set; }
         public Guid IdTypeTicket { get; set; }
+        public int NumberSlot { get; set; }
     }
 }

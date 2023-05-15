@@ -22,8 +22,9 @@ namespace HueFestivalTicket.Controllers
         private readonly IEventLocationRepository _eventLocationRepository;
         private readonly ITypeTicketRepository _typeTicketRepository;
         private readonly ICustomerRepository _customerRepository;
+        private readonly IConfiguration _configuration;
 
-        public TicketsController(ApplicationDbContext context, ITicketRepository ticketRepository, IInvoiceRepository invoiceRepository, IPriceTicketRepository priceTicketRepository, IEventLocationRepository eventLocationRepository, ITypeTicketRepository typeTicketRepository, ICustomerRepository customerRepository)
+        public TicketsController(ApplicationDbContext context, ITicketRepository ticketRepository, IInvoiceRepository invoiceRepository, IPriceTicketRepository priceTicketRepository, IEventLocationRepository eventLocationRepository, ITypeTicketRepository typeTicketRepository, ICustomerRepository customerRepository, IConfiguration configuration)
         {
             _context = context;
             _ticketRepository = ticketRepository;
@@ -32,6 +33,7 @@ namespace HueFestivalTicket.Controllers
             _eventLocationRepository = eventLocationRepository;
             _typeTicketRepository = typeTicketRepository;
             _customerRepository = customerRepository;
+            _configuration = configuration;
         }
 
         // GET: api/Tickets
@@ -109,7 +111,14 @@ namespace HueFestivalTicket.Controllers
                     Message = "This Event Location doesn't exist"
                 });
             }
-            if (eventLocation.NumberSlot == 0)
+            if (eventLocation.DateEnd < DateTime.UtcNow || eventLocation.Status == false)
+            {
+                return Ok(new
+                {
+                    Message = "This Event Location has ended"
+                });
+            }
+            if (eventLocation.Price == 0)
             {
                 return Ok(new
                 {
@@ -140,12 +149,13 @@ namespace HueFestivalTicket.Controllers
                     Message = "This Price Ticket doesn't exist"
                 });
             }
-            var ticketQuantity = await _ticketRepository.GetNumberSlot(ticket.IdEventLocation);
-            if (ticketQuantity + ticket.Number > eventLocation.NumberSlot)
+            var ticketQuantity = await _ticketRepository.GetNumberSlot(ticket.IdEventLocation, ticket.IdTypeTicket);
+
+            if (ticketQuantity + ticket.Number > priceTicket.NumberSlot)
             {
                 return Ok(new
                 {
-                    Message = $"The number of slot of the event location is now only {eventLocation.NumberSlot - ticketQuantity} slot"
+                    Message = $"The number of slot of the event location is now only {priceTicket.NumberSlot - ticketQuantity} slot"
                 });
             }
 
@@ -163,7 +173,7 @@ namespace HueFestivalTicket.Controllers
                 list.Add(result);
             }
 
-            SendEmail(invoice.Customer!.Email!, "Xin chào", "Test thử xem thế nào", list);
+            SendEmail(invoice.Customer!.Email!, list);
             return Ok(new
             {
                 Message = "Insert Success",
@@ -196,11 +206,26 @@ namespace HueFestivalTicket.Controllers
         [HttpGet("GetSlot")]
         public async Task<ActionResult<Ticket>> GetSlotTicket(Guid idEventLocation)
         {
-            var numberSlot = await _ticketRepository.GetNumberSlot(idEventLocation);
-            var slot = await _eventLocationRepository.GetEventLocationByIdAsync(idEventLocation);
+            var eventLocation = await _eventLocationRepository.GetEventLocationByIdAsync(idEventLocation);
+            if (eventLocation == null)
+            {
+                return Ok(new
+                {
+                    Message = "This Event Location doesn't exist"
+                });
+            }
+
+            string message = string.Empty;
+            var slot = await _priceTicketRepository.GetNumberSlotPriceTicketAsync(eventLocation.IdEventLocation);
+            foreach (var item in slot)
+            {
+                var numberSlot = await _ticketRepository.GetNumberSlot(item.IdEventLocation, item.IdTypeTicket);
+                message += $"There are already {numberSlot} {item.TypeTicket!.Name}, {item.NumberSlot - numberSlot} slot left. ";
+            }
             return Ok(new
             {
-                Message = $"Có {numberSlot} và còn {slot!.NumberSlot - numberSlot}"
+                //Message = $"Có {numberSlot} và còn {slot!.NumberSlot - numberSlot}"
+                Message = message
             });
         }
 
@@ -215,7 +240,7 @@ namespace HueFestivalTicket.Controllers
             });
         }*/
 
-        private void SendEmail(string recipient, string subject, string body, List<Ticket> tickets)
+        private void SendEmail(string recipient, List<Ticket> tickets)
         {
             /*
             string currentDirectory = Directory.GetCurrentDirectory();
@@ -227,10 +252,16 @@ namespace HueFestivalTicket.Controllers
                 htmlBody = reader.ReadToEnd();
             }*/
 
+            var host = _configuration["Mail:Host"];
+            var name = _configuration["Mail:Name"];
+            var email = _configuration["Mail:Email"];
+            var password = _configuration["Mail:Password"];
+            var subject = _configuration["Mail:Subject"];
+
             string htmlBody = EmailBuilder.BuildEmailContent(tickets);
 
             var message = new MimeMessage();
-            message.From.Add(new MailboxAddress("Đức Phan Developer", "developer3310@zohomail.com"));
+            message.From.Add(new MailboxAddress(name, email));
             message.To.Add(new MailboxAddress("", recipient));
             message.Subject = subject;
 
@@ -241,10 +272,14 @@ namespace HueFestivalTicket.Controllers
 
             using (var client = new SmtpClient())
             {
-                client.Connect("smtp.zoho.com", 587, SecureSocketOptions.StartTls);
-                client.Authenticate("developer3310@zohomail.com", "H2SHTYZUebwx");
+                //client.Connect("smtp.zoho.com", 587, SecureSocketOptions.StartTls);
+                //client.Authenticate("developer3310@zohomail.com", "H2SHTYZUebwx");
                 //client.Connect("smtp.ethereal.email", 587, SecureSocketOptions.StartTls);
                 //client.Authenticate("gordon.corwin73@ethereal.email", "k15ZCfW2zUztsSyVbc");
+
+                client.Connect(host, 587, SecureSocketOptions.StartTls);
+                client.Authenticate(email, password);
+
                 client.Send(message);
                 client.Disconnect(true);
             }

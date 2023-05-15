@@ -23,11 +23,10 @@ namespace HueFestivalTicket.Repositories
             throw new NotImplementedException();
         }
 
-        public async Task<int> GetNumberSlot(Guid idEventLocation)
+        public async Task<int> GetNumberSlot(Guid idEventLocation, Guid idTypeTicket)
         {
-            List<Ticket> tickets = await _dbSet.Where(t => t.IdEventLocation == idEventLocation).ToListAsync();
+            List<Ticket> tickets = await _dbSet.Where(t => t.IdEventLocation == idEventLocation && t.IdTypeTicket == idTypeTicket).ToListAsync();
             return tickets.Count;
-
         }
 
         public Task<Ticket?> GetTicketByIdAsync(Guid id)

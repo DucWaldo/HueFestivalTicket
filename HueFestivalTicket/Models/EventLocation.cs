@@ -11,8 +11,8 @@ namespace HueFestivalTicket.Models
         public DateTime DateStart { get; set; }
         public DateTime DateEnd { get; set; }
         public DateTime Time { get; set; }
-        public int NumberSlot { get; set; }
         public decimal Price { get; set; }
+        public bool Status { get; set; }
         public Guid IdEvent { get; set; }
         public Guid IdLocation { get; set; }
 

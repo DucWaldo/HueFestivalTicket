@@ -9,6 +9,7 @@ namespace HueFestivalTicket.Repositories.IRepositories
         public Task<List<PriceTicket>> GetAllPriceTicketAsync();
         public Task<PriceTicket?> GetPriceTicketByIdAsync(Guid id);
         public Task<PriceTicket?> GetPriceTicketByIdEventLocationAndIdTypeTicketAsync(Guid idEventLocation, Guid idTypeTicket);
+        public Task<List<PriceTicket>> GetNumberSlotPriceTicketAsync(Guid id);
         public Task<PriceTicket> InsertPriceTicketAsync(PriceTicketDTO priceTicket, decimal price);
         public Task UpdatePriceTicketAsync(PriceTicket oldPriceTicket, PriceTicketDTO newPriceTicket, decimal price);
         public Task DeletePriceTicketAsync(PriceTicket priceTicket);

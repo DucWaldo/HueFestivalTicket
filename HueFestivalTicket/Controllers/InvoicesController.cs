@@ -11,11 +11,13 @@ namespace HueFestivalTicket.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IInvoiceRepository _invoiceRepository;
+        private readonly ICustomerRepository _customerRepository;
 
-        public InvoicesController(ApplicationDbContext context, IInvoiceRepository invoiceRepository)
+        public InvoicesController(ApplicationDbContext context, IInvoiceRepository invoiceRepository, ICustomerRepository customerRepository)
         {
             _context = context;
             _invoiceRepository = invoiceRepository;
+            _customerRepository = customerRepository;
         }
 
         // GET: api/Invoices
@@ -36,6 +38,32 @@ namespace HueFestivalTicket.Controllers
                 return Ok(new
                 {
                     Message = "This Invoice doesn't exist"
+                });
+            }
+
+            return invoice;
+        }
+
+        // GET: api/Invoices/5
+        [HttpGet("GetByCustomerIdCard")]
+        public async Task<ActionResult<IEnumerable<Invoice>>> GetInvoiceCustomer(string idCard)
+        {
+            var customer = await _customerRepository.GetCustomerByIdCardAsync(idCard);
+            if (customer == null)
+            {
+                return Ok(new
+                {
+                    Message = "This Customer doesn't exist"
+                });
+            }
+
+            var invoice = await _invoiceRepository.GetInvoiceByIdCustomerAsync(customer);
+
+            if (invoice.Count == 0)
+            {
+                return Ok(new
+                {
+                    Message = "This Invoice with this Customer doesn't exist"
                 });
             }
 

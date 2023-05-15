@@ -85,14 +85,14 @@ namespace HueFestivalTicket.Controllers
                 });
             }
 
-            if (eventCheck.StatusTicket == false && (eventLocation.NumberSlot > 0 || eventLocation.Price > 0))
+            if (eventCheck.StatusTicket == false && eventLocation.Price > 0)
             {
                 return Ok(new
                 {
                     Message = "This Event doesn't sell tickets, please enter the number slot = 0 and price = 0"
                 });
             }
-            if (eventCheck.StatusTicket == true && (eventLocation.NumberSlot <= 0 || eventLocation.Price <= 0))
+            if (eventCheck.StatusTicket == true && eventLocation.Price <= 0)
             {
                 return Ok(new
                 {
@@ -110,6 +110,40 @@ namespace HueFestivalTicket.Controllers
             }
 
             await _eventLocationRepository.UpdateEventLocationAsync(oldEventLocation, eventLocation);
+            return Ok(new
+            {
+                Message = "Update Success"
+            });
+        }
+
+        // PUT: api/EventLocations/5
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPut("UpdateStatus")]
+        public async Task<IActionResult> UpdateStatusEventLocation(Guid id, bool status)
+        {
+            var eventLocation = await _eventLocationRepository.GetEventLocationByIdAsync(id);
+            if (eventLocation == null)
+            {
+                return Ok(new
+                {
+                    Message = "Event Location not found"
+                });
+            }
+            if (status == eventLocation.Status)
+            {
+                return Ok(new
+                {
+                    Message = "Nothing Changes"
+                });
+            }
+            if (status == true && eventLocation.DateEnd < DateTime.UtcNow)
+            {
+                return Ok(new
+                {
+                    Message = "Event Location has ended, can't be reactivated"
+                });
+            }
+            await _eventLocationRepository.UpdateStatusEventLocationAsync(eventLocation, status);
             return Ok(new
             {
                 Message = "Update Success"
@@ -150,18 +184,18 @@ namespace HueFestivalTicket.Controllers
                     Message = "Location doesn't exist"
                 });
             }
-            if (eventCheck.StatusTicket == false && (eventLocation.NumberSlot > 0 || eventLocation.Price > 0))
+            if (eventCheck.StatusTicket == false && eventLocation.Price > 0)
             {
                 return Ok(new
                 {
-                    Message = "This Event doesn't sell tickets, please enter the number slot = 0 and price = 0"
+                    Message = "This Event doesn't sell tickets, please enter the price = 0"
                 });
             }
-            if (eventCheck.StatusTicket == true && (eventLocation.NumberSlot <= 0 || eventLocation.Price <= 0))
+            if (eventCheck.StatusTicket == true && eventLocation.Price <= 0)
             {
                 return Ok(new
                 {
-                    Message = "Please enter number slot or price"
+                    Message = "Please enter Price"
                 });
             }
 

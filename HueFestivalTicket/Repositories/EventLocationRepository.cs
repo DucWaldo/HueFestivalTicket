@@ -42,8 +42,8 @@ namespace HueFestivalTicket.Repositories
                 DateStart = DateTime.ParseExact(eventLocation.DateStart!, "dd/MM/yyyy", CultureInfo.InvariantCulture),
                 DateEnd = DateTime.ParseExact(eventLocation.DateEnd!, "dd/MM/yyyy", CultureInfo.InvariantCulture),
                 Time = DateTime.ParseExact(eventLocation.Time!, "HH:mm", CultureInfo.InvariantCulture),
-                NumberSlot = eventLocation.NumberSlot,
                 Price = eventLocation.Price,
+                Status = true,
                 IdEvent = eventLocation.IdEvent,
                 IdLocation = eventLocation.IdLocation
             };
@@ -56,7 +56,6 @@ namespace HueFestivalTicket.Repositories
             oldEventLocation.DateStart = DateTime.ParseExact(newEventLocation.DateStart!, "dd/MM/yyyy", CultureInfo.InvariantCulture);
             oldEventLocation.DateEnd = DateTime.ParseExact(newEventLocation.DateEnd!, "dd/MM/yyyy", CultureInfo.InvariantCulture);
             oldEventLocation.Time = DateTime.ParseExact(newEventLocation.Time!, "HH:mm", CultureInfo.InvariantCulture);
-            oldEventLocation.NumberSlot = newEventLocation.NumberSlot;
             oldEventLocation.Price = newEventLocation.Price;
             oldEventLocation.IdEvent = newEventLocation.IdEvent;
             oldEventLocation.IdLocation = newEventLocation.IdLocation;
@@ -129,6 +128,12 @@ namespace HueFestivalTicket.Repositories
                 return "DateEnd Invalid";
             }
             return string.Empty;
+        }
+
+        public async Task UpdateStatusEventLocationAsync(EventLocation eventLocation, bool status)
+        {
+            eventLocation.Status = status;
+            await UpdateAsync(eventLocation);
         }
     }
 }

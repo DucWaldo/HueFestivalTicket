@@ -33,6 +33,12 @@ namespace HueFestivalTicket.Repositories
             return result;
         }
 
+        public async Task<List<Invoice>> GetInvoiceByIdCustomerAsync(Customer customer)
+        {
+            var list = await _dbSet.Include(i => i.Customer).Where(i => i.IdCustomer == customer.IdCustomer).ToListAsync();
+            return list;
+        }
+
         public async Task<Invoice> InsertInvoiceAsync(InvoiceDTO invoice)
         {
             var newInvoice = new Invoice

@@ -43,6 +43,12 @@ namespace HueFestivalTicket.Repositories
             return await GetAllWithIncludesAsync(pt => pt.EventLocation!.Event!, pt => pt.EventLocation!.Location!.TypeLocation!, pt => pt.TypeTicket!);
         }
 
+        public async Task<List<PriceTicket>> GetNumberSlotPriceTicketAsync(Guid IdEventLocation)
+        {
+            var list = await _dbSet.Include(pt => pt.TypeTicket).Where(pt => pt.IdEventLocation == IdEventLocation).ToListAsync();
+            return list;
+        }
+
         public async Task<PriceTicket?> GetPriceTicketByIdAsync(Guid id)
         {
             var priceTicket = await _dbSet.FirstOrDefaultAsync(pt => pt.IdPriceTicket == id);
@@ -60,6 +66,7 @@ namespace HueFestivalTicket.Repositories
             var newPriceTicket = new PriceTicket()
             {
                 Price = priceTicket.Price + price,
+                NumberSlot = priceTicket.NumberSlot,
                 IdEventLocation = priceTicket.IdEventLocation,
                 IdTypeTicket = priceTicket.IdTypeTicket
             };
@@ -72,6 +79,7 @@ namespace HueFestivalTicket.Repositories
             oldPriceTicket.Price = newPriceTicket.Price + price;
             oldPriceTicket.IdEventLocation = newPriceTicket.IdEventLocation;
             oldPriceTicket.IdTypeTicket = newPriceTicket.IdTypeTicket;
+            oldPriceTicket.NumberSlot = newPriceTicket.NumberSlot;
 
             await UpdateAsync(oldPriceTicket);
         }

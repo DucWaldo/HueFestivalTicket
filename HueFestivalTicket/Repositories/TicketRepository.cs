@@ -18,9 +18,9 @@ namespace HueFestivalTicket.Repositories
             throw new NotImplementedException();
         }
 
-        public Task<List<Ticket>> GetAllTicketsAsync()
+        public async Task<List<Ticket>> GetAllTicketsAsync()
         {
-            throw new NotImplementedException();
+            return await GetAllWithIncludesAsync(t => t.EventLocation!.Event!);
         }
 
         public async Task<int> GetNumberSlot(Guid idEventLocation, Guid idTypeTicket)
@@ -34,9 +34,20 @@ namespace HueFestivalTicket.Repositories
             throw new NotImplementedException();
         }
 
-        public Task<Ticket?> GetTicketByTicketTicketNumberAsync(string ticketNumber)
+        public async Task<Ticket?> GetTicketByTicketNumberAsync(string ticketNumber)
         {
-            throw new NotImplementedException();
+            var ticket = await _dbSet.Include(t => t.EventLocation!.Event)
+                .Include(t => t.EventLocation!.Location!.TypeLocation)
+                .Include(t => t.TypeTicket)
+                .Include(t => t.Invoice!.Customer)
+                .FirstOrDefaultAsync(t => t.TicketNumber == ticketNumber);
+            return ticket;
+        }
+
+        public async Task<object> GetTicketPagingAsync(int pageNumber, int pageSize)
+        {
+            List<Ticket> data = await GetPage(pageNumber, pageSize, t => t.TicketNumber!, t => t.EventLocation!.Event!, t => t.EventLocation!.Location!.TypeLocation!, t => t.Invoice!.Customer!, t => t.TypeTicket!);
+            return ReturnGetPage(data, pageNumber, pageSize);
         }
 
         public async Task<Ticket> InsertTicketAsync(TicketDTO ticket, Invoice invoice, EventLocation eventLocation, TypeTicket typeTicket, PriceTicket priceTicket)

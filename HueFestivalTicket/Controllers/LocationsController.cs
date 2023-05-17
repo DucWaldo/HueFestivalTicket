@@ -25,21 +25,21 @@ namespace HueFestivalTicket.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Location>>> GetLocations()
         {
-            if (_context.Locations == null)
-            {
-                return NotFound();
-            }
             return await _locationRepository.GetAllLocationsAsync();
+        }
+
+        // GET: api/Locations/Paging
+        [HttpGet("Paging")]
+        public async Task<ActionResult<IEnumerable<Location>>> GetLocationPaging(int pageNumber, int pageSize)
+        {
+            var result = await _locationRepository.GetLocationPagingAsync(pageNumber, pageSize);
+            return Ok(result);
         }
 
         // GET: api/Locations/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Location>> GetLocation(Guid id)
         {
-            if (_context.Locations == null)
-            {
-                return NotFound();
-            }
             var location = await _locationRepository.GetLocationByIdAsync(id);
 
             if (location == null)
@@ -86,11 +86,6 @@ namespace HueFestivalTicket.Controllers
         [HttpPost]
         public async Task<ActionResult<Location>> PostLocation([FromForm] LocationDTO location)
         {
-            if (_context.Locations == null)
-            {
-                return Problem("Entity set 'ApplicationDbContext.Locations'  is null.");
-            }
-
             if (_locationRepository.CheckImage(location.ImageUrl) == false)
             {
                 return Ok(new
@@ -120,10 +115,6 @@ namespace HueFestivalTicket.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteLocation(Guid id)
         {
-            if (_context.Locations == null)
-            {
-                return NotFound();
-            }
             var location = await _locationRepository.GetLocationByIdAsync(id);
             if (location == null)
             {

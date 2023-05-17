@@ -26,6 +26,14 @@ namespace HueFestivalTicket.Controllers
             return await _customerRepository.GetAllCustomersAsync();
         }
 
+        // GET: api/Customers/Paging
+        [HttpGet("Paging")]
+        public async Task<ActionResult<IEnumerable<Customer>>> GetCustomerPaging(int pageNumber, int pageSize)
+        {
+            var result = await _customerRepository.GetCustomerPagingAsync(pageNumber, pageSize);
+            return Ok(result);
+        }
+
         // GET: api/Customers/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Customer>> GetCustomer(Guid id)
@@ -141,11 +149,6 @@ namespace HueFestivalTicket.Controllers
             {
                 Message = "Delete Success"
             });
-        }
-
-        private bool CustomerExists(Guid id)
-        {
-            return (_context.Customers?.Any(e => e.IdCustomer == id)).GetValueOrDefault();
         }
     }
 }

@@ -45,6 +45,12 @@ namespace HueFestivalTicket.Repositories
             return location;
         }
 
+        public async Task<object> GetLocationPagingAsync(int pageNumber, int pageSize)
+        {
+            List<Location> data = await GetPage(pageNumber, pageSize, l => l.Title!, l => l.TypeLocation!);
+            return ReturnGetPage(data, pageNumber, pageSize);
+        }
+
         public async Task<Location> InsertLocationAsync(LocationDTO location)
         {
             var imageName = Guid.NewGuid().ToString() + Path.GetExtension(location.ImageUrl?.FileName);

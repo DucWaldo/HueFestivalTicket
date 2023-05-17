@@ -45,6 +45,12 @@ namespace HueFestivalTicket.Repositories
             return _mapper.Map<EventDTO>(events);
         }
 
+        public async Task<object> GetEventPagingAsync(int pageNumber, int pageSize)
+        {
+            List<Event> data = await GetPage(pageNumber, pageSize, e => e.Name!);
+            return ReturnGetPage(data, pageNumber, pageSize);
+        }
+
         public async Task InsertEventAsync(EventDTO @event)
         {
             var newEvent = _mapper.Map<Event>(@event);

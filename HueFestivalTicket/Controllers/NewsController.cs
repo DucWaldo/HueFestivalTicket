@@ -25,26 +25,29 @@ namespace HueFestivalTicket.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<News>>> GetNews()
         {
-            if (_context.News == null)
-            {
-                return NotFound();
-            }
             return await _newsRepository.GetAllNewsAsync();
+        }
+
+        // GET: api/News/Paging
+        [HttpGet("Paging")]
+        public async Task<ActionResult<IEnumerable<News>>> GetNewsPaging(int pageNumber, int pageSize)
+        {
+            var result = await _newsRepository.GetNewsPagingAsync(pageNumber, pageSize);
+            return Ok(result);
         }
 
         // GET: api/News/5
         [HttpGet("{id}")]
         public async Task<ActionResult<News>> GetNews(Guid id)
         {
-            if (_context.News == null)
-            {
-                return NotFound();
-            }
-            var news = await _context.News.FindAsync(id);
+            var news = await _newsRepository.GetNewsByIdAsync(id);
 
             if (news == null)
             {
-                return NotFound();
+                return Ok(new
+                {
+                    Message = "This News doesn't exist"
+                });
             }
 
             return news;
@@ -148,10 +151,6 @@ namespace HueFestivalTicket.Controllers
         [Authorize]
         public async Task<ActionResult<IEnumerable<News>>> GetNewsByAccount()
         {
-            if (_context.News == null)
-            {
-                return NotFound();
-            }
             return await _newsRepository.GetAllNewsByAccountAsync(Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value));
         }
     }

@@ -8,15 +8,12 @@ namespace HueFestivalTicket.Models
     {
         [Key]
         public Guid IdCheckin { get; set; }
+        public string? QRCodeContent { get; set; }
         public DateTime TimeCheckin { get; set; }
         public bool Status { get; set; }
         public Guid IdAccount { get; set; }
-        public Guid IdTicket { get; set; }
 
         [ForeignKey("IdAccount")]
         public Account? Account { get; set; }
-
-        [ForeignKey("IdTicket")]
-        public Ticket? Ticket { get; set; }
     }
 }

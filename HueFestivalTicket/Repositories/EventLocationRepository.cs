@@ -26,7 +26,9 @@ namespace HueFestivalTicket.Repositories
 
         public async Task<EventLocation?> GetEventLocationByIdAsync(Guid id)
         {
-            var result = await _dbSet.Include(el => el.Event).Include(el => el.Location!.TypeLocation).FirstOrDefaultAsync(el => el.IdEventLocation == id);
+            var result = await _dbSet.Include(el => el.Event)
+                .Include(el => el.Location!.TypeLocation)
+                .FirstOrDefaultAsync(el => el.IdEventLocation == id);
             return result;
         }
 
@@ -88,7 +90,7 @@ namespace HueFestivalTicket.Repositories
             {
                 return "Date Invalid because there is an event location within that time period";
             }
-            if (dStart <= DateTime.UtcNow)
+            if (dStart <= DateTime.Today)
             {
                 return "DateStart Invalid";
             }
@@ -119,7 +121,7 @@ namespace HueFestivalTicket.Repositories
             {
                 return "Unable to start at this time at this location";
             }
-            if (dStart <= DateTime.UtcNow)
+            if (dStart <= DateTime.Today)
             {
                 return "DateStart Invalid";
             }
@@ -134,6 +136,12 @@ namespace HueFestivalTicket.Repositories
         {
             eventLocation.Status = status;
             await UpdateAsync(eventLocation);
+        }
+
+        public async Task<object> GetEventLocationPagingAsync(int pageNumber, int pageSize)
+        {
+            List<EventLocation> data = await GetPage(pageNumber, pageSize, el => el.DateStart, el => el.Event!, el => el.Location!.TypeLocation!);
+            return ReturnGetPage(data, pageNumber, pageSize);
         }
     }
 }

@@ -26,21 +26,21 @@ namespace HueFestivalTicket.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<EventLocation>>> GetEventLocations()
         {
-            if (_context.EventLocations == null)
-            {
-                return NotFound();
-            }
             return await _eventLocationRepository.GetAllEventLocationsAsync();
+        }
+
+        // GET: api/EventLocations/Paging
+        [HttpGet("Paging")]
+        public async Task<ActionResult<IEnumerable<EventLocation>>> GetEventLocationPaging(int pageNumber, int pageSize)
+        {
+            var result = await _eventLocationRepository.GetEventLocationPagingAsync(pageNumber, pageSize);
+            return Ok(result);
         }
 
         // GET: api/EventLocations/5
         [HttpGet("{id}")]
         public async Task<ActionResult<EventLocation>> GetEventLocation(Guid id)
         {
-            if (_context.EventLocations == null)
-            {
-                return NotFound();
-            }
             var eventLocation = await _eventLocationRepository.GetEventLocationByIdAsync(id);
 
             if (eventLocation == null)
@@ -155,11 +155,6 @@ namespace HueFestivalTicket.Controllers
         [HttpPost]
         public async Task<ActionResult<EventLocation>> PostEventLocation(EventLocationDTO eventLocation)
         {
-            if (_context.EventLocations == null)
-            {
-                return Problem("Entity set 'ApplicationDbContext.EventLocations'  is null.");
-            }
-
             var messageCheck = await _eventLocationRepository.CheckDateTimeEventLocation(eventLocation);
             if (messageCheck != string.Empty)
             {
@@ -211,10 +206,6 @@ namespace HueFestivalTicket.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteEventLocation(Guid id)
         {
-            if (_context.EventLocations == null)
-            {
-                return NotFound();
-            }
             var eventLocation = await _eventLocationRepository.GetEventLocationByIdAsync(id);
             if (eventLocation == null)
             {

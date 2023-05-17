@@ -7,6 +7,7 @@ namespace HueFestivalTicket.Repositories.IRepositories
     public interface IEventRepository : IRepository<Event>
     {
         public Task<List<Event>> GetAllEventsAsync();
+        public Task<object> GetEventPagingAsync(int pageNumber, int pageSize);
         public Task<Event?> GetEventByIdAsync(Guid Id);
         public Task<EventDTO> GetEventByNameAsync(string name);
         public Task InsertEventAsync(EventDTO @event);

@@ -50,6 +50,36 @@ namespace HueFestivalTicket.Repositories.RepositoryService
             return await query.ToListAsync();
         }
 
+        public async Task<List<TEntity>> GetPage(int pageNumber, int pageSize, Expression<Func<TEntity, object>> orderBy, params Expression<Func<TEntity, object>>[] includeExpressions)
+        {
+            var query = _context.Set<TEntity>().AsQueryable();
+
+            foreach (var includeProperty in includeExpressions)
+            {
+                query = query.Include(includeProperty);
+            }
+            query = query.OrderBy(orderBy);
+            int skip = (pageNumber - 1) * pageSize;
+
+            var pagedData = await query.Skip(skip).Take(pageSize).ToListAsync();
+            return pagedData;
+        }
+
+        public PagingDTO<TEntity> ReturnGetPage(List<TEntity> data, int pageNumber, int pageSize)
+        {
+            int totalCount = GetAllAsync().Result.Count;
+            int totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+            var paginationResponse = new PagingDTO<TEntity>
+            {
+                TotalCount = totalCount,
+                TotalPages = totalPages,
+                CurrentPage = pageNumber,
+                PageSize = pageSize,
+                Data = data
+            };
+            return paginationResponse;
+        }
+
         /*
         public RepositoryBase(ApplicationDbContext dbContext)
         {

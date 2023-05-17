@@ -6,7 +6,6 @@ using HueFestivalTicket.Repositories.IRepositories;
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using MimeKit;
 
 namespace HueFestivalTicket.Controllers
@@ -23,8 +22,9 @@ namespace HueFestivalTicket.Controllers
         private readonly ITypeTicketRepository _typeTicketRepository;
         private readonly ICustomerRepository _customerRepository;
         private readonly IConfiguration _configuration;
+        private readonly EmailBuilderWithCloudinary _emailBuilder;
 
-        public TicketsController(ApplicationDbContext context, ITicketRepository ticketRepository, IInvoiceRepository invoiceRepository, IPriceTicketRepository priceTicketRepository, IEventLocationRepository eventLocationRepository, ITypeTicketRepository typeTicketRepository, ICustomerRepository customerRepository, IConfiguration configuration)
+        public TicketsController(ApplicationDbContext context, ITicketRepository ticketRepository, IInvoiceRepository invoiceRepository, IPriceTicketRepository priceTicketRepository, IEventLocationRepository eventLocationRepository, ITypeTicketRepository typeTicketRepository, ICustomerRepository customerRepository, IConfiguration configuration, EmailBuilderWithCloudinary emailBuilder)
         {
             _context = context;
             _ticketRepository = ticketRepository;
@@ -34,32 +34,36 @@ namespace HueFestivalTicket.Controllers
             _typeTicketRepository = typeTicketRepository;
             _customerRepository = customerRepository;
             _configuration = configuration;
+            _emailBuilder = new EmailBuilderWithCloudinary(_configuration);
         }
 
         // GET: api/Tickets
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Ticket>>> GetTickets()
         {
-            if (_context.Tickets == null)
-            {
-                return NotFound();
-            }
-            return await _context.Tickets.ToListAsync();
+            return await _ticketRepository.GetAllTicketsAsync();
+        }
+
+        // GET: api/Tickets/Paging
+        [HttpGet("Paging")]
+        public async Task<ActionResult<IEnumerable<Ticket>>> GetTicketPaging(int pageNumber, int pageSize)
+        {
+            var result = await _ticketRepository.GetTicketPagingAsync(pageNumber, pageSize);
+            return Ok(result);
         }
 
         // GET: api/Tickets/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Ticket>> GetTicket(Guid id)
+        [HttpGet("{numberTicket}")]
+        public async Task<ActionResult<Ticket>> GetTicket(string numberTicket)
         {
-            if (_context.Tickets == null)
-            {
-                return NotFound();
-            }
-            var ticket = await _context.Tickets.FindAsync(id);
+            var ticket = await _ticketRepository.GetTicketByTicketNumberAsync(numberTicket);
 
             if (ticket == null)
             {
-                return NotFound();
+                return Ok(new
+                {
+                    Message = "This Ticket doesn't exist"
+                });
             }
 
             return ticket;
@@ -111,7 +115,7 @@ namespace HueFestivalTicket.Controllers
                     Message = "This Event Location doesn't exist"
                 });
             }
-            if (eventLocation.DateEnd < DateTime.UtcNow || eventLocation.Status == false)
+            if (eventLocation.DateEnd < DateTime.Today || eventLocation.Status == false)
             {
                 return Ok(new
                 {
@@ -220,8 +224,9 @@ namespace HueFestivalTicket.Controllers
             foreach (var item in slot)
             {
                 var numberSlot = await _ticketRepository.GetNumberSlot(item.IdEventLocation, item.IdTypeTicket);
-                message += $"There are already {numberSlot} {item.TypeTicket!.Name}, {item.NumberSlot - numberSlot} slot left. ";
+                message += $"There are already {numberSlot} slot {item.TypeTicket!.Name}, {item.NumberSlot - numberSlot} slot left." + "\n";
             }
+            Console.WriteLine(message);
             return Ok(new
             {
                 //Message = $"Có {numberSlot} và còn {slot!.NumberSlot - numberSlot}"
@@ -258,7 +263,8 @@ namespace HueFestivalTicket.Controllers
             var password = _configuration["Mail:Password"];
             var subject = _configuration["Mail:Subject"];
 
-            string htmlBody = EmailBuilder.BuildEmailContent(tickets);
+            //string htmlBody = EmailBuilder.BuildEmailContent(tickets);
+            string htmlBody = _emailBuilder.BuildEmailContent(tickets);
 
             var message = new MimeMessage();
             message.From.Add(new MailboxAddress(name, email));

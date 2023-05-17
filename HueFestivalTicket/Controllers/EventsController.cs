@@ -23,21 +23,21 @@ namespace HueFestivalTicket.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Event>>> GetEvents()
         {
-            if (_context.Events == null)
-            {
-                return NotFound();
-            }
             return await _eventRepository.GetAllEventsAsync();
+        }
+
+        // GET: api/Events/Paging
+        [HttpGet("Paging")]
+        public async Task<ActionResult<IEnumerable<Event>>> GetEventPaging(int pageNumber, int pageSize)
+        {
+            var result = await _eventRepository.GetEventPagingAsync(pageNumber, pageSize);
+            return Ok(result);
         }
 
         // GET: api/Events/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Event>> GetEvent(Guid id)
         {
-            if (_context.Events == null)
-            {
-                return NotFound();
-            }
             var @event = await _eventRepository.GetEventByIdAsync(id);
 
             if (@event == null)
@@ -86,11 +86,6 @@ namespace HueFestivalTicket.Controllers
         [HttpPost]
         public async Task<ActionResult<Event>> PostEvent(EventDTO @event)
         {
-            if (_context.Events == null)
-            {
-                return Problem("Entity set 'ApplicationDbContext.Events'  is null.");
-            }
-
             var eventName = await _eventRepository.GetEventByNameAsync(@event.Name ?? "");
             if (eventName != null)
             {
@@ -120,10 +115,6 @@ namespace HueFestivalTicket.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteEvent(Guid id)
         {
-            if (_context.Events == null)
-            {
-                return NotFound();
-            }
             var @event = await _eventRepository.GetEventByIdAsync(id);
             if (@event == null)
             {

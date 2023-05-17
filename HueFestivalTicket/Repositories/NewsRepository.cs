@@ -45,7 +45,7 @@ namespace HueFestivalTicket.Repositories
 
         public async Task<News?> GetNewsByIdAsync(Guid id)
         {
-            var result = await _dbSet.FirstOrDefaultAsync(n => n.IdNews == id);
+            var result = await _dbSet.Include(n => n.Account!.Role).FirstOrDefaultAsync(n => n.IdNews == id);
             return result;
         }
 
@@ -53,6 +53,12 @@ namespace HueFestivalTicket.Repositories
         {
             var result = await _dbSet.FirstOrDefaultAsync(n => n.Title == title);
             return result;
+        }
+
+        public async Task<object> GetNewsPagingAsync(int pageNumber, int pageSize)
+        {
+            List<News> data = await GetPage(pageNumber, pageSize, n => n.TimeCreate, n => n.Account!.Role!);
+            return ReturnGetPage(data, pageNumber, pageSize);
         }
 
         public async Task<News> InsertNewsAsync(NewsDTO news, Guid id)

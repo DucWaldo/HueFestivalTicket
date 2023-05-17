@@ -49,6 +49,12 @@ namespace HueFestivalTicket.Repositories
             return result;
         }
 
+        public async Task<object> GetCustomerPagingAsync(int pageNumber, int pageSize)
+        {
+            List<Customer> data = await GetPage(pageNumber, pageSize, c => c.IdCustomer);
+            return ReturnGetPage(data, pageNumber, pageSize);
+        }
+
         public async Task<Customer> InsertCustomerAsync(CustomerDTO customer)
         {
             var newCustomer = new Customer

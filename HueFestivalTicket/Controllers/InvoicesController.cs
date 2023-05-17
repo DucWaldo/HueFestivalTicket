@@ -27,6 +27,14 @@ namespace HueFestivalTicket.Controllers
             return await _invoiceRepository.GetAllInvoiceAsync();
         }
 
+        // GET: api/Invoices/Paging
+        [HttpGet("Paging")]
+        public async Task<ActionResult<IEnumerable<Invoice>>> GetInvoicePaging(int pageNumber, int pageSize)
+        {
+            var result = await _invoiceRepository.GetInvoicePagingAsync(pageNumber, pageSize);
+            return Ok(result);
+        }
+
         // GET: api/Invoices/5
         [HttpGet("{id}")]
         public async Task<ActionResult<Invoice>> GetInvoice(Guid id)

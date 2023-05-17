@@ -25,11 +25,15 @@ namespace HueFestivalTicket.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<TypeLocation>>> GetTypeLocations()
         {
-            if (_context.TypeLocations == null)
-            {
-                return NotFound();
-            }
             return await _typeLocationRepository.GetAllTypeLocationAsync();
+        }
+
+        // GET: api/TypeLocations/Paging
+        [HttpGet("Paging")]
+        public async Task<ActionResult<IEnumerable<TypeLocation>>> GetTypeLocationPaging(int pageNumber, int pageSize)
+        {
+            var result = await _typeLocationRepository.GetTypeLocationPagingAsync(pageNumber, pageSize);
+            return Ok(result);
         }
 
         // GET: api/TypeLocations/5

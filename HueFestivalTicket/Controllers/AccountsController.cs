@@ -1,4 +1,5 @@
 ﻿using HueFestivalTicket.Contexts;
+using HueFestivalTicket.Middlewares;
 using HueFestivalTicket.Models;
 using HueFestivalTicket.Repositories.IRepositories;
 using Microsoft.AspNetCore.Authorization;
@@ -13,21 +14,19 @@ namespace HueFestivalTicket.Controllers
     {
         private readonly ApplicationDbContext _context;
         private readonly IAccountRepository _accountRepository;
+        private readonly IVerifyRepository _verifyRepository;
 
-        public AccountsController(ApplicationDbContext context, IAccountRepository accountRepository)
+        public AccountsController(ApplicationDbContext context, IAccountRepository accountRepository, IVerifyRepository verifyRepository)
         {
             _context = context;
             _accountRepository = accountRepository;
+            _verifyRepository = verifyRepository;
         }
 
         // GET: api/Accounts
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Account>>> GetAccounts()
         {
-            if (_context.Accounts == null)
-            {
-                return NotFound();
-            }
             return await _accountRepository.GetAllAccountAsync();
         }
 
@@ -35,10 +34,6 @@ namespace HueFestivalTicket.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Account>> GetAccount(Guid id)
         {
-            if (_context.Accounts == null)
-            {
-                return NotFound();
-            }
             var account = await _accountRepository.GetAccountByIdAsync(id);
 
             if (account == null)
@@ -52,12 +47,40 @@ namespace HueFestivalTicket.Controllers
             return account;
         }
 
+        // GET: api/Accounts/5
+        [HttpPut("ChangePassword")]
+        [Authorize]
+        public async Task<ActionResult<Account>> ChangePassword(string oldPassword, string newPassword, string verifyCode)
+        {
+            var acc = await _accountRepository.GetAccountByIdAsync(Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)?.Value!));
+            if (acc == null || acc.Password != Generate.GetMD5Hash(oldPassword))
+            {
+                return Ok(new
+                {
+                    Message = "Old password is incorrect"
+                });
+            }
+            var checkVerifyCode = await _verifyRepository.CheckVerifyCodeAsync(acc.Username!, verifyCode);
+            if (checkVerifyCode == false)
+            {
+                return Ok(new
+                {
+                    Message = "Verify code is incorrect or expired"
+                });
+            }
+            await _verifyRepository.UpdateVerifyCodeAsync(acc.Username!, verifyCode);
+            await _accountRepository.ChangePasswordAsync(acc.Username!, newPassword);
+            return Ok(new
+            {
+                Message = "Change Password Success"
+            });
+        }
+
         [HttpGet("acc")]
         [Authorize]
         public IActionResult Get()
         {
             var IdAccount = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
             return Ok(new
             {
                 IdAccount

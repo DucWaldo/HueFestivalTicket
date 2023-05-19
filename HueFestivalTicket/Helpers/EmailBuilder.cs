@@ -1,12 +1,21 @@
 ﻿using HueFestivalTicket.Models;
 using QRCoder;
+using System.Drawing;
+using System.Drawing.Imaging;
 using System.Text;
 
 namespace HueFestivalTicket.Helpers
 {
     public class EmailBuilder
     {
-        public static string BuildEmailContent(List<Ticket> tickets)
+        private readonly IWebHostEnvironment _environment;
+
+        public EmailBuilder(IWebHostEnvironment environment)
+        {
+            _environment = environment;
+        }
+
+        public string BuildEmailContent(List<Ticket> tickets)
         {
             StringBuilder sb = new StringBuilder();
 
@@ -50,7 +59,9 @@ namespace HueFestivalTicket.Helpers
                 string qrCodeAsBase64 = qrCode.GetGraphic(5);
 
                 // Insert QRCode Image
-                sb.AppendLine($"<img src='data:image/png;base64,{qrCodeAsBase64}' alt='QR Code' />");
+                string qrCodeUrl = GenerateQRCodeImage(ticket.QRCode!, ticket.TicketNumber!);
+                sb.AppendLine($"<img src='cid:{qrCodeUrl}' alt='QR Code' />");
+                //sb.AppendLine($"<img src='data:image/png;base64,{qrCodeAsBase64}' alt='QR Code' />");
 
                 sb.AppendLine("</div>");
                 sb.AppendLine("</li>");
@@ -62,6 +73,30 @@ namespace HueFestivalTicket.Helpers
             sb.AppendLine("</html>");
 
             return sb.ToString();
+        }
+        public string GenerateQRCodeImage(string content, string name)
+        {
+            var newImagePath = _environment.WebRootPath + "\\images\\";
+            // Tạo đường dẫn và tên file mới
+            //string fileName = Guid.NewGuid().ToString("N") + ".png";
+            string fileName = name + ".png";
+            string filePath = System.IO.Path.Combine(newImagePath, fileName);
+
+            // Tạo mã QR từ chuỗi văn bản
+            using (QRCodeGenerator qrGenerator = new QRCodeGenerator())
+            {
+                QRCodeData qrCodeData = qrGenerator.CreateQrCode(content, QRCodeGenerator.ECCLevel.Q);
+                QRCode qrCode = new QRCode(qrCodeData);
+
+                // Chuyển đổi mã QR thành hình ảnh
+                Bitmap qrCodeImage = qrCode.GetGraphic(20);
+
+                // Lưu hình ảnh mã QR vào file
+                qrCodeImage.Save(filePath, ImageFormat.Png);
+            }
+
+            // Trả về đường dẫn của file mã QR
+            return fileName;
         }
     }
 }

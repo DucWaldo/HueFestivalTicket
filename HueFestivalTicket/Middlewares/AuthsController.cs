@@ -1,13 +1,15 @@
 ﻿using HueFestivalTicket.Contexts;
 using HueFestivalTicket.Data;
 using HueFestivalTicket.Models;
+using HueFestivalTicket.Repositories.IRepositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
 using System.Text;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account;
+using Twilio.Types;
 
 namespace HueFestivalTicket.Middlewares
 {
@@ -17,18 +19,31 @@ namespace HueFestivalTicket.Middlewares
     {
         private readonly ApplicationDbContext _context;
         private readonly IConfiguration _configuration;
+        private readonly IAccountRepository _accountRepository;
+        private readonly IRoleRepository _roleRepository;
+        private readonly ITokenRepository _tokenRepository;
+        private readonly IVerifyRepository _verifyRepository;
 
-        public AuthsController(ApplicationDbContext context, IConfiguration configuration)
+        public AuthsController(ApplicationDbContext context,
+            IConfiguration configuration,
+            IAccountRepository accountRepository,
+            ITokenRepository tokenRepository,
+            IRoleRepository roleRepository,
+            IVerifyRepository verifyRepository)
         {
             _context = context;
             _configuration = configuration;
+            _accountRepository = accountRepository;
+            _tokenRepository = tokenRepository;
+            _roleRepository = roleRepository;
+            _verifyRepository = verifyRepository;
         }
 
         // POST: api/Accounts/Login
         [HttpPost("Login")]
         public async Task<IActionResult> Login([FromBody] AccountDTO account)
         {
-            var accountLogin = await _context.Accounts.SingleOrDefaultAsync(x => x.Username == account.Username && x.Password == Generate.GetMD5Hash(account.Password ?? ""));
+            var accountLogin = await _accountRepository.GetAccountLoginAsync(account);
             if (accountLogin == null)
             {
                 return Ok(new
@@ -44,7 +59,7 @@ namespace HueFestivalTicket.Middlewares
                 });
             }
 
-            var rolename = await _context.Roles.SingleOrDefaultAsync(x => x.IdRole == accountLogin.IdRole);
+            var rolename = await _roleRepository.GetRoleByIdAsync(accountLogin.IdRole);
             if (rolename == null)
             {
                 return Ok(new
@@ -53,52 +68,13 @@ namespace HueFestivalTicket.Middlewares
                 });
             }
 
+            var result = await _tokenRepository.InsertTokenAsync(accountLogin, rolename);
             return Ok(new
             {
                 Message = "Login Success",
-                Token = await CreateToken(accountLogin, rolename)
+                //Token = await CreateToken(accountLogin, rolename)
+                Token = result
             });
-        }
-
-        private async Task<Token> CreateToken(Account account, Role role)
-        {
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Key"] ?? "");
-
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(new Claim[]
-                {
-                    new Claim(ClaimTypes.NameIdentifier, account.IdAccount.ToString() ?? ""),
-                    new Claim(ClaimTypes.Role, role.Name ?? "")
-                }),
-                Expires = DateTime.UtcNow.AddDays(1),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-            };
-
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            var accessToken = tokenHandler.WriteToken(token);
-            var refreshToken = Generate.GetRefreshToken();
-
-            var managerToken = new ManagerToken
-            {
-                Token = refreshToken,
-                JwtId = accessToken,
-                IsUsed = false,
-                IsRevoked = false,
-                IssuedAt = DateTime.UtcNow,
-                ExpiredAt = DateTime.UtcNow.AddHours(1),
-                IdAccount = account.IdAccount
-            };
-
-            await _context.ManagerTokens.AddAsync(managerToken);
-            await _context.SaveChangesAsync();
-
-            return new Token
-            {
-                AccessToken = accessToken,
-                RefreshToken = refreshToken
-            };
         }
 
         [HttpPost("RefreshToken")]
@@ -153,7 +129,7 @@ namespace HueFestivalTicket.Middlewares
                 }
 
                 //Check refreshtoken exist in DB
-                var storedToken = _context.ManagerTokens.FirstOrDefault(x => x.Token == tokens.RefreshToken);
+                var storedToken = await _tokenRepository.GetTokenAsync(tokens.RefreshToken ?? "");
                 if (storedToken == null)
                 {
                     return Ok(new
@@ -179,22 +155,23 @@ namespace HueFestivalTicket.Middlewares
                 }
 
                 //Update token is used
-                storedToken.IsRevoked = true;
-                storedToken.IsUsed = true;
-                _context.Update(storedToken);
-                await _context.SaveChangesAsync();
+                //storedToken.IsRevoked = true;
+                //storedToken.IsUsed = true;
+                //_context.Update(storedToken);
+                //await _context.SaveChangesAsync();
+                await _tokenRepository.UpdateTokenAsync(storedToken);
 
                 //create new token
-                var account = await _context.Accounts.SingleOrDefaultAsync(acc => acc.IdAccount == storedToken.IdAccount);
+                var account = await _accountRepository.GetAccountByIdAsync(storedToken.IdAccount);
                 if (account == null)
                 {
                     return Ok(new
                     {
-                        Message = "Invalid username/password"
+                        Message = "Invalid account"
                     });
                 }
 
-                var rolename = await _context.Roles.SingleOrDefaultAsync(x => x.IdRole == account.IdRole);
+                var rolename = await _roleRepository.GetRoleByIdAsync(account.IdRole);
                 if (rolename == null)
                 {
                     return Ok(new
@@ -203,12 +180,12 @@ namespace HueFestivalTicket.Middlewares
                     });
                 }
 
-                var token = await CreateToken(account, rolename);
+                var token = await _tokenRepository.InsertTokenAsync(account, rolename);
 
                 return Ok(new
                 {
                     Message = "Refresh token success",
-                    Data = token
+                    Token = token
                 });
             }
             catch (Exception)
@@ -228,6 +205,70 @@ namespace HueFestivalTicket.Middlewares
             {
                 message = "Logout success"
             });
+        }
+
+        [HttpPost("SendVerifyCode")]
+        public async Task<ActionResult<ManagerVerify>> SendVerifyCode(string userName)
+        {
+            var account = await _accountRepository.CheckUsernameAsync(userName);
+            if (account == false)
+            {
+                return Ok(new
+                {
+                    Message = "Username doesn't exist"
+                });
+            }
+            var code = Generate.GetVerifyCode();
+
+            await _verifyRepository.InsertVerifyAsync(userName, code);
+            SendVerificationCode(userName, code);
+            return Ok(new
+            {
+                Message = $"Sent verification code to phone number {userName}"
+            });
+        }
+
+        [HttpPost("ForgotPassword")]
+        public async Task<ActionResult> ForgotPassword(string userName, string newPassword, string verifyCode)
+        {
+            var account = await _accountRepository.CheckUsernameAsync(userName);
+            if (account == false)
+            {
+                return Ok(new
+                {
+                    Message = "Username doesn't exist"
+                });
+            }
+            var checkVerifyCode = await _verifyRepository.CheckVerifyCodeAsync(userName, verifyCode);
+            if (checkVerifyCode == false)
+            {
+                return Ok(new
+                {
+                    Message = "Verify code is incorrect or expired"
+                });
+            }
+            await _verifyRepository.UpdateVerifyCodeAsync(userName, verifyCode);
+            await _accountRepository.ChangePasswordAsync(userName, newPassword);
+            return Ok(new
+            {
+                Message = "Change Password Success"
+            });
+        }
+
+        private void SendVerificationCode(string phoneNumber, string resetCode)
+        {
+            var accountSid = "ACedc47febc9fb9ec166272b2d799d711a";
+            var authToken = "31d12cdf0278d31ab684f75484177598";
+            var twilioPhoneNumber = "+12763986630";
+
+            TwilioClient.Init(accountSid, authToken);
+
+            var messageOptions = new CreateMessageOptions(new PhoneNumber(Generate.GetPhoneNumber(phoneNumber)));
+            messageOptions.From = new PhoneNumber(twilioPhoneNumber);
+            messageOptions.Body = $"Mã xác thực của bạn là: {resetCode}";
+
+            // Gửi tin nhắn chứa mã xác thực qua Twilio
+            var message = MessageResource.Create(messageOptions);
         }
     }
 }

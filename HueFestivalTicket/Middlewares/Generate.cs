@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using PhoneNumbers;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace HueFestivalTicket.Middlewares
@@ -20,7 +21,7 @@ namespace HueFestivalTicket.Middlewares
                 return sb.ToString();
             }
         }
-        
+
         public static string GetRefreshToken()
         {
             var random = new byte[32];
@@ -29,6 +30,22 @@ namespace HueFestivalTicket.Middlewares
                 ran.GetBytes(random);
                 return Convert.ToBase64String(random);
             }
+        }
+
+        public static string GetVerifyCode()
+        {
+            Random random = new Random();
+            int verificationCode = random.Next(100000, 999999);
+            return verificationCode.ToString();
+        }
+
+        public static string GetPhoneNumber(string phoneNumber)
+        {
+            PhoneNumberUtil phoneNumberUtil = PhoneNumberUtil.GetInstance();
+            PhoneNumber parsedPhoneNumber = phoneNumberUtil.Parse(phoneNumber, "VN");
+
+            string internationalPhoneNumber = phoneNumberUtil.Format(parsedPhoneNumber, PhoneNumberFormat.E164);
+            return internationalPhoneNumber;
         }
     }
 }

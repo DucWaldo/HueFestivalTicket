@@ -217,7 +217,10 @@ namespace HueFestivalTicket.Controllers
 
             await _eventLocationRepository.DeleteEventLocationAsync(eventLocation);
 
-            return NoContent();
+            return Ok(new
+            {
+                Message = "Delete Success"
+            });
         }
     }
 }

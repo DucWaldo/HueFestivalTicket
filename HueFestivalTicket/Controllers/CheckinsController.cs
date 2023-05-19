@@ -104,7 +104,7 @@ namespace HueFestivalTicket.Controllers
                     Message = "Please enter QRCode Content"
                 });
             }
-            string[] qrcodeContent = checkin.QRCodeContent!.Split("+");
+            string[] qrcodeContent = checkin.QRCodeContent!.Split("|");
             var checkTicket = await _ticketRepository.GetTicketByTicketNumberAsync(qrcodeContent[0]);
 
             if (checkTicket == null)
@@ -164,7 +164,7 @@ namespace HueFestivalTicket.Controllers
 
         private bool CheckTicket(Ticket ticket, string qrCodeContent)
         {
-            string[] qrcodeContent = qrCodeContent!.Split("+");
+            string[] qrcodeContent = qrCodeContent!.Split("|");
 
             if (qrcodeContent[1] != ticket.EventLocation!.Event!.Name)
             {

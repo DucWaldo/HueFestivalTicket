@@ -82,8 +82,11 @@ builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<IInvoiceRepository, InvoiceRepository>();
 builder.Services.AddScoped<ITicketRepository, TicketRepository>();
 builder.Services.AddScoped<ICheckinRepository, CheckinRepository>();
+builder.Services.AddScoped<ITokenRepository, TokenRepository>();
+builder.Services.AddScoped<IVerifyRepository, VerifyRepository>();
 
 builder.Services.AddScoped<EmailBuilderWithCloudinary>();
+builder.Services.AddScoped<EmailBuilder>();
 
 var app = builder.Build();
 

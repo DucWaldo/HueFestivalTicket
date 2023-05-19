@@ -3,6 +3,7 @@ using CloudinaryDotNet.Actions;
 using HueFestivalTicket.Models;
 using QRCoder;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Text;
 
 namespace HueFestivalTicket.Helpers
@@ -10,10 +11,12 @@ namespace HueFestivalTicket.Helpers
     public class EmailBuilderWithCloudinary
     {
         private readonly IConfiguration _configuration;
+        private readonly IWebHostEnvironment _environment;
 
-        public EmailBuilderWithCloudinary(IConfiguration configuration)
+        public EmailBuilderWithCloudinary(IConfiguration configuration, IWebHostEnvironment environment)
         {
             _configuration = configuration;
+            _environment = environment;
         }
 
         public string BuildEmailContent(List<Ticket> tickets)
@@ -45,6 +48,7 @@ namespace HueFestivalTicket.Helpers
             sb.AppendLine("<h1>--- Mã Vé ---</h1>");
             sb.AppendLine("<p>Dưới đây là mã vé của bạn, vui lòng đưa trước nhân viên soát vé để được kiểm tra</p>");
 
+            /*
             // Insert Ticket List
             sb.AppendLine("<ul>");
             foreach (var ticket in tickets)
@@ -61,7 +65,7 @@ namespace HueFestivalTicket.Helpers
                 sb.AppendLine("</div>");
                 sb.AppendLine("</li>");
             }
-            sb.AppendLine("</ul>");
+            sb.AppendLine("</ul>");*/
 
             // End HTML
             sb.AppendLine("</body>");
@@ -107,6 +111,39 @@ namespace HueFestivalTicket.Helpers
 
             // Trả về đường dẫn ảnh từ Cloudinary
             return uploadResult.SecureUrl.ToString();
+        }
+
+        public string GenerateQRCodeImage(string content, string name)
+        {
+            var newImagePath = _environment.WebRootPath + "\\images\\";
+            // Tạo đường dẫn và tên file mới
+            //string fileName = Guid.NewGuid().ToString("N") + ".png";
+            string fileName = name + ".png";
+            string filePath = System.IO.Path.Combine(newImagePath, fileName);
+
+            // Tạo mã QR từ chuỗi văn bản
+            using (QRCodeGenerator qrGenerator = new QRCodeGenerator())
+            {
+                QRCodeData qrCodeData = qrGenerator.CreateQrCode(content, QRCodeGenerator.ECCLevel.Q);
+                QRCode qrCode = new QRCode(qrCodeData);
+
+                // Chuyển đổi mã QR thành hình ảnh
+                Bitmap qrCodeImage = qrCode.GetGraphic(20);
+
+                // Lưu hình ảnh mã QR vào file
+                qrCodeImage.Save(filePath, ImageFormat.Png);
+            }
+
+            // Trả về đường dẫn của file mã QR
+            return filePath;
+        }
+
+        public void DeleteFile(string? imagePath)
+        {
+            if (System.IO.File.Exists(imagePath))
+            {
+                System.IO.File.Delete(imagePath);
+            }
         }
     }
 }

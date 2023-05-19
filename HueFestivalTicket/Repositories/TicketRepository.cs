@@ -52,11 +52,13 @@ namespace HueFestivalTicket.Repositories
 
         public async Task<Ticket> InsertTicketAsync(TicketDTO ticket, Invoice invoice, EventLocation eventLocation, TypeTicket typeTicket, PriceTicket priceTicket)
         {
-            string ticketNumber = DateTime.UtcNow.ToString("yyyyMMddHHmmssfff");
+            Random random = new Random();
+            int randomNumber = random.Next(1000, 9999);
+            string ticketNumber = DateTime.UtcNow.ToString("yyyyMMddHHmmssff") + randomNumber.ToString();
             var newTicket = new Ticket()
             {
                 TicketNumber = ticketNumber,
-                QRCode = ticketNumber + "+" + eventLocation.Event!.Name + "+" + eventLocation.Time.ToString("HH:mm") + "+" + eventLocation.DateStart.ToString("dd/MM/yyyy") + "+" + eventLocation.Location!.Title + "+" + priceTicket.Price + "+" + typeTicket.Name,
+                QRCode = ticketNumber + "|" + eventLocation.Event!.Name + "|" + eventLocation.Time.ToString("HH:mm") + "|" + eventLocation.DateStart.ToString("dd/MM/yyyy") + "|" + eventLocation.Location!.Title + "|" + priceTicket.Price + "|" + typeTicket.Name,
                 Price = priceTicket.Price,
                 IdEventLocation = ticket.IdEventLocation,
                 IdInvoice = invoice.IdInvoice,

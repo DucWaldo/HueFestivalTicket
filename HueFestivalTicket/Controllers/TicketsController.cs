@@ -23,8 +23,10 @@ namespace HueFestivalTicket.Controllers
         private readonly ICustomerRepository _customerRepository;
         private readonly IConfiguration _configuration;
         private readonly EmailBuilderWithCloudinary _emailBuilder;
+        private readonly IWebHostEnvironment _environment;
 
-        public TicketsController(ApplicationDbContext context, ITicketRepository ticketRepository, IInvoiceRepository invoiceRepository, IPriceTicketRepository priceTicketRepository, IEventLocationRepository eventLocationRepository, ITypeTicketRepository typeTicketRepository, ICustomerRepository customerRepository, IConfiguration configuration, EmailBuilderWithCloudinary emailBuilder)
+
+        public TicketsController(ApplicationDbContext context, ITicketRepository ticketRepository, IInvoiceRepository invoiceRepository, IPriceTicketRepository priceTicketRepository, IEventLocationRepository eventLocationRepository, ITypeTicketRepository typeTicketRepository, ICustomerRepository customerRepository, IConfiguration configuration, EmailBuilderWithCloudinary emailBuilder, EmailBuilder emailBuilderTest, IWebHostEnvironment environment)
         {
             _context = context;
             _ticketRepository = ticketRepository;
@@ -34,7 +36,9 @@ namespace HueFestivalTicket.Controllers
             _typeTicketRepository = typeTicketRepository;
             _customerRepository = customerRepository;
             _configuration = configuration;
-            _emailBuilder = new EmailBuilderWithCloudinary(_configuration);
+            _environment = environment;
+            _emailBuilder = new EmailBuilderWithCloudinary(_configuration, _environment);
+
         }
 
         // GET: api/Tickets
@@ -68,39 +72,6 @@ namespace HueFestivalTicket.Controllers
 
             return ticket;
         }
-
-        /*
-        // PUT: api/Tickets/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutTicket(Guid id, Ticket ticket)
-        {
-            if (id != ticket.IdTicket)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(ticket).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!TicketExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
-        */
 
         // POST: api/Tickets
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
@@ -247,23 +218,16 @@ namespace HueFestivalTicket.Controllers
 
         private void SendEmail(string recipient, List<Ticket> tickets)
         {
-            /*
-            string currentDirectory = Directory.GetCurrentDirectory();
-            string relativePath = "Helpers/email.html";
-            string fullPath = Path.Combine(currentDirectory, relativePath);            
-            string htmlBody = string.Empty;
-            using (StreamReader reader = new StreamReader(fullPath))
-            {
-                htmlBody = reader.ReadToEnd();
-            }*/
-
             var host = _configuration["Mail:Host"];
             var name = _configuration["Mail:Name"];
             var email = _configuration["Mail:Email"];
             var password = _configuration["Mail:Password"];
             var subject = _configuration["Mail:Subject"];
+            var webRootPath = _environment.WebRootPath;
+            //var filePath = webRootPath + "\\images\\26a674b4-a776-44d2-9d09-35e1f989a879.jpg";
 
-            //string htmlBody = EmailBuilder.BuildEmailContent(tickets);
+
+            //string htmlBody = _emailBuilderTest.BuildEmailContent(tickets);
             string htmlBody = _emailBuilder.BuildEmailContent(tickets);
 
             var message = new MimeMessage();
@@ -273,13 +237,18 @@ namespace HueFestivalTicket.Controllers
 
             var bodyBuilder = new BodyBuilder();
             bodyBuilder.HtmlBody = htmlBody;
+            foreach (var ticket in tickets)
+            {
+                var filePath = _emailBuilder.GenerateQRCodeImage(ticket.QRCode!, ticket.TicketNumber!);
+                bodyBuilder.Attachments.Add(filePath);
+                _emailBuilder.DeleteFile(filePath);
+            }
+
 
             message.Body = bodyBuilder.ToMessageBody();
 
             using (var client = new SmtpClient())
             {
-                //client.Connect("smtp.zoho.com", 587, SecureSocketOptions.StartTls);
-                //client.Authenticate("developer3310@zohomail.com", "H2SHTYZUebwx");
                 //client.Connect("smtp.ethereal.email", 587, SecureSocketOptions.StartTls);
                 //client.Authenticate("gordon.corwin73@ethereal.email", "k15ZCfW2zUztsSyVbc");
 

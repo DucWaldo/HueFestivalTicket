@@ -6,7 +6,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Text;
 
-namespace HueFestivalTicket.Helpers
+namespace HueFestivalTicket.Helpers.EmailBuilder
 {
     public class EmailBuilderWithCloudinary
     {
@@ -41,9 +41,9 @@ namespace HueFestivalTicket.Helpers
             sb.AppendLine($"<p>Địa chỉ: {tickets[0].EventLocation!.Location!.Address} </p>");
             sb.AppendLine($"<p>Thời gian tổ chức: {tickets[0].EventLocation!.DateStart.ToString("dd/MM/yyyy")} vào lúc {tickets[0].EventLocation!.Time.ToString("HH:mm")} </p>");
             sb.AppendLine($"<p>Số lượng vé: {tickets.Count} </p>");
-            sb.AppendLine($"<p>Giá vé: {tickets[0].Price} </p>");
+            sb.AppendLine($"<p>Giá vé: {(int)tickets[0].Price} </p>");
             sb.AppendLine($"<p>Loại vé: {tickets[0].TypeTicket!.Name} </p>");
-            sb.AppendLine($"<p>Tổng hoá đơn: {tickets[0].Invoice!.Total} </p>");
+            sb.AppendLine($"<p>Tổng hoá đơn: {(int)tickets[0].Invoice!.Total} </p>");
 
             sb.AppendLine("<h1>--- Mã Vé ---</h1>");
             sb.AppendLine("<p>Dưới đây là mã vé của bạn, vui lòng đưa trước nhân viên soát vé để được kiểm tra</p>");
@@ -95,7 +95,7 @@ namespace HueFestivalTicket.Helpers
 
             // Chuyển đổi Bitmap thành Stream
             MemoryStream stream = new MemoryStream();
-            qrCodeImage.Save(stream, System.Drawing.Imaging.ImageFormat.Png);
+            qrCodeImage.Save(stream, ImageFormat.Png);
             stream.Position = 0;
 
             // Tạo các thông tin để tải ảnh lên Cloudinary
@@ -119,7 +119,7 @@ namespace HueFestivalTicket.Helpers
             // Tạo đường dẫn và tên file mới
             //string fileName = Guid.NewGuid().ToString("N") + ".png";
             string fileName = name + ".png";
-            string filePath = System.IO.Path.Combine(newImagePath, fileName);
+            string filePath = Path.Combine(newImagePath, fileName);
 
             // Tạo mã QR từ chuỗi văn bản
             using (QRCodeGenerator qrGenerator = new QRCodeGenerator())
@@ -140,9 +140,9 @@ namespace HueFestivalTicket.Helpers
 
         public void DeleteFile(string? imagePath)
         {
-            if (System.IO.File.Exists(imagePath))
+            if (File.Exists(imagePath))
             {
-                System.IO.File.Delete(imagePath);
+                File.Delete(imagePath);
             }
         }
     }

@@ -4,7 +4,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Text;
 
-namespace HueFestivalTicket.Helpers
+namespace HueFestivalTicket.Helpers.EmailBuilder
 {
     public class EmailBuilder
     {
@@ -80,7 +80,7 @@ namespace HueFestivalTicket.Helpers
             // Tạo đường dẫn và tên file mới
             //string fileName = Guid.NewGuid().ToString("N") + ".png";
             string fileName = name + ".png";
-            string filePath = System.IO.Path.Combine(newImagePath, fileName);
+            string filePath = Path.Combine(newImagePath, fileName);
 
             // Tạo mã QR từ chuỗi văn bản
             using (QRCodeGenerator qrGenerator = new QRCodeGenerator())

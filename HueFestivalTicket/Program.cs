@@ -1,5 +1,6 @@
 using HueFestivalTicket.Contexts;
 using HueFestivalTicket.Helpers;
+using HueFestivalTicket.Helpers.EmailBuilder;
 using HueFestivalTicket.Repositories;
 using HueFestivalTicket.Repositories.IRepositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -84,9 +85,12 @@ builder.Services.AddScoped<ITicketRepository, TicketRepository>();
 builder.Services.AddScoped<ICheckinRepository, CheckinRepository>();
 builder.Services.AddScoped<ITokenRepository, TokenRepository>();
 builder.Services.AddScoped<IVerifyRepository, VerifyRepository>();
+builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 
 builder.Services.AddScoped<EmailBuilderWithCloudinary>();
 builder.Services.AddScoped<EmailBuilder>();
+
+builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 

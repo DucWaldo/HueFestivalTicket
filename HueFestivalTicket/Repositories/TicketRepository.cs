@@ -58,7 +58,13 @@ namespace HueFestivalTicket.Repositories
             var newTicket = new Ticket()
             {
                 TicketNumber = ticketNumber,
-                QRCode = ticketNumber + "|" + eventLocation.Event!.Name + "|" + eventLocation.Time.ToString("HH:mm") + "|" + eventLocation.DateStart.ToString("dd/MM/yyyy") + "|" + eventLocation.Location!.Title + "|" + priceTicket.Price + "|" + typeTicket.Name,
+                QRCode = ticketNumber
+                    + "|" + eventLocation.Event!.Name
+                    + "|" + eventLocation.Time.ToString("HH:mm")
+                    + "|" + eventLocation.DateStart.ToString("dd/MM/yyyy")
+                    + "|" + eventLocation.Location!.Title
+                    + "|" + (int)priceTicket.Price
+                    + "|" + typeTicket.Name,
                 Price = priceTicket.Price,
                 IdEventLocation = ticket.IdEventLocation,
                 IdInvoice = invoice.IdInvoice,

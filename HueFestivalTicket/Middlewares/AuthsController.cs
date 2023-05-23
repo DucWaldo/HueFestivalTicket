@@ -258,7 +258,7 @@ namespace HueFestivalTicket.Middlewares
         private void SendVerificationCode(string phoneNumber, string resetCode)
         {
             var accountSid = "ACedc47febc9fb9ec166272b2d799d711a";
-            var authToken = "31d12cdf0278d31ab684f75484177598";
+            var authToken = "3d48725a1b604a2bf493e75746687a82";
             var twilioPhoneNumber = "+12763986630";
 
             TwilioClient.Init(accountSid, authToken);

@@ -1,6 +1,7 @@
 ﻿using HueFestivalTicket.Contexts;
 using HueFestivalTicket.Data;
-using HueFestivalTicket.Helpers;
+using HueFestivalTicket.Helpers.EmailBuilder;
+using HueFestivalTicket.Helpers.Payment;
 using HueFestivalTicket.Models;
 using HueFestivalTicket.Repositories.IRepositories;
 using MailKit.Net.Smtp;
@@ -24,9 +25,19 @@ namespace HueFestivalTicket.Controllers
         private readonly IConfiguration _configuration;
         private readonly EmailBuilderWithCloudinary _emailBuilder;
         private readonly IWebHostEnvironment _environment;
+        private readonly IPaymentRepository _paymentRepository;
 
 
-        public TicketsController(ApplicationDbContext context, ITicketRepository ticketRepository, IInvoiceRepository invoiceRepository, IPriceTicketRepository priceTicketRepository, IEventLocationRepository eventLocationRepository, ITypeTicketRepository typeTicketRepository, ICustomerRepository customerRepository, IConfiguration configuration, EmailBuilderWithCloudinary emailBuilder, EmailBuilder emailBuilderTest, IWebHostEnvironment environment)
+        public TicketsController(ApplicationDbContext context,
+            ITicketRepository ticketRepository,
+            IInvoiceRepository invoiceRepository,
+            IPriceTicketRepository priceTicketRepository,
+            IEventLocationRepository eventLocationRepository,
+            ITypeTicketRepository typeTicketRepository,
+            ICustomerRepository customerRepository,
+            IConfiguration configuration,
+            IWebHostEnvironment environment,
+            IPaymentRepository paymentRepository)
         {
             _context = context;
             _ticketRepository = ticketRepository;
@@ -38,7 +49,7 @@ namespace HueFestivalTicket.Controllers
             _configuration = configuration;
             _environment = environment;
             _emailBuilder = new EmailBuilderWithCloudinary(_configuration, _environment);
-
+            _paymentRepository = paymentRepository;
         }
 
         // GET: api/Tickets
@@ -73,6 +84,7 @@ namespace HueFestivalTicket.Controllers
             return ticket;
         }
 
+        /*
         // POST: api/Tickets
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
@@ -155,27 +167,165 @@ namespace HueFestivalTicket.Controllers
                 list
             });
         }
-        /*
-        // DELETE: api/Tickets/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteTicket(Guid id)
-        {
-            if (_context.Tickets == null)
-            {
-                return NotFound();
-            }
-            var ticket = await _context.Tickets.FindAsync(id);
-            if (ticket == null)
-            {
-                return NotFound();
-            }
-
-            _context.Tickets.Remove(ticket);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
         */
+
+        // POST: api/Tickets/BeforePayment
+        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [HttpPost("BeforePayment")]
+        public async Task<ActionResult<Ticket>> PostTicketBeforePayment([FromForm] TicketDTO ticket)
+        {
+            var eventLocation = await _eventLocationRepository.GetEventLocationByIdAsync(ticket.IdEventLocation);
+            if (eventLocation == null)
+            {
+                return Ok(new
+                {
+                    Message = "This Event Location doesn't exist"
+                });
+            }
+            if (eventLocation.DateEnd < DateTime.Today || eventLocation.Status == false)
+            {
+                return Ok(new
+                {
+                    Message = "This Event Location has ended"
+                });
+            }
+            if (eventLocation.Price == 0)
+            {
+                return Ok(new
+                {
+                    Message = "This Event Location is a free event, no booking required"
+                });
+            }
+            var typeTicket = await _typeTicketRepository.GetTypeTicketByIdAsync(ticket.IdTypeTicket);
+            if (typeTicket == null)
+            {
+                return Ok(new
+                {
+                    Message = "This Type Ticket doesn't exist"
+                });
+            }
+            var customer = await _customerRepository.GetCustomerByIdAsync(ticket.IdCustomer);
+            if (customer == null)
+            {
+                return Ok(new
+                {
+                    Message = "This Customer doesn't exist"
+                });
+            }
+            var priceTicket = await _priceTicketRepository.GetPriceTicketByIdEventLocationAndIdTypeTicketAsync(ticket.IdEventLocation, ticket.IdTypeTicket);
+            if (priceTicket == null)
+            {
+                return Ok(new
+                {
+                    Message = "This Price Ticket doesn't exist"
+                });
+            }
+            var ticketQuantity = await _ticketRepository.GetNumberSlot(ticket.IdEventLocation, ticket.IdTypeTicket);
+
+            if (ticketQuantity + ticket.Number > priceTicket.NumberSlot)
+            {
+                return Ok(new
+                {
+                    Message = $"The number of slot of the event location is now only {priceTicket.NumberSlot - ticketQuantity} slot"
+                });
+            }
+
+            var newInvoice = new InvoiceDTO
+            {
+                IdCustomer = customer.IdCustomer,
+                Total = priceTicket.Price * ticket.Number
+            };
+            var invoice = await _invoiceRepository.InsertInvoiceAsync(newInvoice);
+            var payment = _paymentRepository.Payment(invoice.IdInvoice, invoice.Total, ticket);
+            return Ok(new
+            {
+                Message = payment
+            });
+        }
+
+        [HttpGet("AfterPayment")]
+        public async Task<ActionResult> PaymentReturnAsync()
+        {
+            if (Request.QueryString.ToString().Length > 0)
+            {
+                string hashSecret = _configuration["VnPay:HashSecret"] ?? ""; //Chuỗi bí mật
+                var vnpayData = Request.Query;
+                PayLib pay = new PayLib();
+
+                //lấy toàn bộ dữ liệu được trả về
+                var queryParameters = vnpayData.ToDictionary(x => x.Key, x => x.Value.ToString());
+                foreach (var s in queryParameters)
+                {
+                    string key = s.Key;
+                    string value = s.Value;
+                    if (!string.IsNullOrEmpty(value) && key.StartsWith("vnp_"))
+                    {
+                        pay.AddResponseData(key, value);
+                    }
+                }
+
+                string orderId = pay.GetResponseData("vnp_TxnRef"); //mã hóa đơn
+                long vnpayTranId = Convert.ToInt64(pay.GetResponseData("vnp_TransactionNo")); //mã giao dịch tại hệ thống VNPAY
+                string vnp_ResponseCode = pay.GetResponseData("vnp_ResponseCode"); //response code: 00 - thành công, khác 00 - xem thêm https://sandbox.vnpayment.vn/apis/docs/bang-ma-loi/
+                string vnp_SecureHash = Request.Query["vnp_SecureHash"].FirstOrDefault()!; //hash của dữ liệu trả về
+                string[] vnp_OrderInfo = pay.GetResponseData("vnp_OrderInfo").Split("|");
+                bool checkSignature = pay.ValidateSignature(vnp_SecureHash, hashSecret); //check chữ ký đúng hay không?
+
+                if (checkSignature)
+                {
+                    if (vnp_ResponseCode == "00")
+                    {
+                        //Thanh toán thành công
+                        var ticket = new TicketDTO
+                        {
+                            IdEventLocation = Guid.Parse(vnp_OrderInfo[0]),
+                            IdTypeTicket = Guid.Parse(vnp_OrderInfo[1]),
+                            IdCustomer = Guid.Parse(vnp_OrderInfo[2]),
+                            Number = int.Parse(vnp_OrderInfo[3]),
+                        };
+                        var eventLocation = await _eventLocationRepository.GetEventLocationByIdAsync(ticket.IdEventLocation);
+                        var typeTicket = await _typeTicketRepository.GetTypeTicketByIdAsync(ticket.IdTypeTicket);
+                        var priceTicket = await _priceTicketRepository.GetPriceTicketByIdEventLocationAndIdTypeTicketAsync(ticket.IdEventLocation, ticket.IdTypeTicket);
+                        var invoice = await _invoiceRepository.GetInvoiceByIdAsync(Guid.Parse(orderId));
+
+                        List<Ticket> list = new List<Ticket>();
+                        foreach (var item in Enumerable.Range(1, int.Parse(vnp_OrderInfo[3])))
+                        {
+                            var result = await _ticketRepository.InsertTicketAsync(ticket, invoice!, eventLocation!, typeTicket!, priceTicket!);
+                            list.Add(result);
+                        }
+
+                        SendEmail(invoice!.Customer!.Email!, list);
+                        return Ok(new
+                        {
+                            Message = $"Thanh toán thành công hoá đơn {orderId}, vui lòng truy cập vào email {invoice.Customer.Email} của bạn để nhận vé",
+                            list
+                        });
+                    }
+                    else
+                    {
+                        //Thanh toán không thành công. Mã lỗi: vnp_ResponseCode
+                        return Ok(new
+                        {
+                            Message = "Có lỗi xảy ra trong quá trình xử lý hóa đơn " + orderId + " | Mã giao dịch: " + vnpayTranId + " | Mã lỗi: " + vnp_ResponseCode
+                        });
+                    }
+                }
+                else
+                {
+                    return Ok(new
+                    {
+                        Message = "Có lỗi xảy ra trong quá trình xử lý"
+                    });
+                }
+            }
+
+            return Ok(new
+            {
+                Message = "Vui lòng đặt vé và thanh toán"
+            });
+        }
+
 
         // GET: api/Tickets/EventLocation
         [HttpGet("GetSlot")]
@@ -205,17 +355,6 @@ namespace HueFestivalTicket.Controllers
             });
         }
 
-        /*
-        [HttpGet("Email")]
-        public async Task<ActionResult<Ticket>> CheckEmail(string email)
-        {
-            //SendEmail(email, "Xin chào", "Test thử xem thế nào");
-            return Ok(new
-            {
-                Message = "Send Success"
-            });
-        }*/
-
         private void SendEmail(string recipient, List<Ticket> tickets)
         {
             var host = _configuration["Mail:Host"];
@@ -223,7 +362,8 @@ namespace HueFestivalTicket.Controllers
             var email = _configuration["Mail:Email"];
             var password = _configuration["Mail:Password"];
             var subject = _configuration["Mail:Subject"];
-            var webRootPath = _environment.WebRootPath;
+
+            //var webRootPath = _environment.WebRootPath;
             //var filePath = webRootPath + "\\images\\26a674b4-a776-44d2-9d09-35e1f989a879.jpg";
 
 

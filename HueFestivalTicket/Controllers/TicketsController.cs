@@ -235,8 +235,9 @@ namespace HueFestivalTicket.Controllers
                 IdCustomer = customer.IdCustomer,
                 Total = priceTicket.Price * ticket.Number
             };
-            var invoice = await _invoiceRepository.InsertInvoiceAsync(newInvoice);
-            var payment = _paymentRepository.Payment(invoice.IdInvoice, invoice.Total, ticket);
+            //var invoice = await _invoiceRepository.InsertInvoiceAsync(newInvoice);
+            //var payment = _paymentRepository.Payment(invoice.IdInvoice, invoice.Total, ticket);
+            var payment = _paymentRepository.Payment(Guid.NewGuid(), priceTicket.Price * ticket.Number, ticket);
             return Ok(new
             {
                 Message = payment
@@ -269,6 +270,7 @@ namespace HueFestivalTicket.Controllers
                 string vnp_ResponseCode = pay.GetResponseData("vnp_ResponseCode"); //response code: 00 - thành công, khác 00 - xem thêm https://sandbox.vnpayment.vn/apis/docs/bang-ma-loi/
                 string vnp_SecureHash = Request.Query["vnp_SecureHash"].FirstOrDefault()!; //hash của dữ liệu trả về
                 string[] vnp_OrderInfo = pay.GetResponseData("vnp_OrderInfo").Split("|");
+                string vnp_Amount = pay.GetResponseData("vnp_Amount");
                 bool checkSignature = pay.ValidateSignature(vnp_SecureHash, hashSecret); //check chữ ký đúng hay không?
 
                 if (checkSignature)
@@ -286,8 +288,16 @@ namespace HueFestivalTicket.Controllers
                         var eventLocation = await _eventLocationRepository.GetEventLocationByIdAsync(ticket.IdEventLocation);
                         var typeTicket = await _typeTicketRepository.GetTypeTicketByIdAsync(ticket.IdTypeTicket);
                         var priceTicket = await _priceTicketRepository.GetPriceTicketByIdEventLocationAndIdTypeTicketAsync(ticket.IdEventLocation, ticket.IdTypeTicket);
-                        var invoice = await _invoiceRepository.GetInvoiceByIdAsync(Guid.Parse(orderId));
+                        //
 
+                        var newInvoice = new InvoiceDTO
+                        {
+                            IdInvoice = Guid.Parse(orderId),
+                            IdCustomer = ticket.IdCustomer,
+                            Total = decimal.Parse(vnp_Amount) / 100
+                        };
+                        var invoice = await _invoiceRepository.InsertInvoiceAsync(newInvoice);
+                        var invoices = await _invoiceRepository.GetInvoiceByIdAsync(Guid.Parse(orderId));
                         List<Ticket> list = new List<Ticket>();
                         foreach (var item in Enumerable.Range(1, int.Parse(vnp_OrderInfo[3])))
                         {
@@ -295,7 +305,7 @@ namespace HueFestivalTicket.Controllers
                             list.Add(result);
                         }
 
-                        SendEmail(invoice!.Customer!.Email!, list);
+                        SendEmail(invoices!.Customer!.Email!, list);
                         return Ok(new
                         {
                             Message = $"Thanh toán thành công hoá đơn {orderId}, vui lòng truy cập vào email {invoice.Customer.Email} của bạn để nhận vé",

@@ -49,6 +49,7 @@ namespace HueFestivalTicket.Repositories
         {
             var newInvoice = new Invoice
             {
+                IdInvoice = invoice.IdInvoice,
                 TimeCreate = DateTime.UtcNow,
                 Total = invoice.Total,
                 IdCustomer = invoice.IdCustomer

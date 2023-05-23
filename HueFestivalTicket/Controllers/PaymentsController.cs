@@ -1,4 +1,5 @@
 ﻿using HueFestivalTicket.Helpers.Payment;
+using HueFestivalTicket.Middlewares;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HueFestivalTicket.Controllers
@@ -18,11 +19,12 @@ namespace HueFestivalTicket.Controllers
         [HttpPost("Payment")]
         public ActionResult Payment()
         {
+            /*
             return Ok(new
             {
                 Message = "Controller này chỉ để test"
-            });
-            /*
+            });*/
+
             string url = _configuration["VnPay:Url"] ?? "";
             string returnUrl = "https://localhost:7099/api/Payments/ReturnPayment";
             string tmnCode = _configuration["VnPay:TmnCode"] ?? "";
@@ -51,7 +53,7 @@ namespace HueFestivalTicket.Controllers
             {
                 Message = paymentUrl
             });
-            */
+
         }
 
         [HttpGet("ReturnPayment")]

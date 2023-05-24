@@ -3,6 +3,7 @@ using HueFestivalTicket.Contexts;
 using HueFestivalTicket.Data;
 using HueFestivalTicket.Models;
 using HueFestivalTicket.Repositories.IRepositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HueFestivalTicket.Controllers
@@ -10,7 +11,7 @@ namespace HueFestivalTicket.Controllers
 
     [Route("api/[controller]")]
     [ApiController]
-    //[Authorize(Roles ="Admin")]
+    [Authorize(Policy = "AdminPolicy")]
     public class RolesController : ControllerBase
     {
         private readonly ApplicationDbContext _context;

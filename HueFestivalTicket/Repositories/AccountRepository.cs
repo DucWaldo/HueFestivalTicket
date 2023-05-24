@@ -39,7 +39,7 @@ namespace HueFestivalTicket.Repositories
 
         public async Task<Account?> GetAccountByIdAsync(Guid id)
         {
-            var account = await _dbSet.FirstOrDefaultAsync(a => a.IdAccount == id);
+            var account = await _dbSet.Include(acc => acc.Role).FirstOrDefaultAsync(a => a.IdAccount == id);
             return account;
         }
 
@@ -66,6 +66,12 @@ namespace HueFestivalTicket.Repositories
             };
             await InsertAsync(newAccount);
             return newAccount;
+        }
+
+        public async Task UpdateRoleAsync(Account account, Guid idRole)
+        {
+            account.IdRole = idRole;
+            await UpdateAsync(account);
         }
     }
 }

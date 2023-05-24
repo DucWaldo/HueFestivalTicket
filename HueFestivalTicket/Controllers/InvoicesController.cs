@@ -1,12 +1,14 @@
 ﻿using HueFestivalTicket.Contexts;
 using HueFestivalTicket.Models;
 using HueFestivalTicket.Repositories.IRepositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HueFestivalTicket.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Policy = "ManagerOrStaff")]
     public class InvoicesController : ControllerBase
     {
         private readonly ApplicationDbContext _context;

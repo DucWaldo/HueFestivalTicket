@@ -10,6 +10,7 @@ namespace HueFestivalTicket.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Policy = "ManagerOrStaff")]
     public class CheckinsController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -90,7 +91,6 @@ namespace HueFestivalTicket.Controllers
         // POST: api/Checkins
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        [Authorize]
         public async Task<ActionResult<Checkin>> PostCheckin([FromForm] CheckinDTO checkin)
         {
             bool status;

@@ -2,6 +2,7 @@
 using HueFestivalTicket.Data;
 using HueFestivalTicket.Models;
 using HueFestivalTicket.Repositories.IRepositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HueFestivalTicket.Controllers
@@ -55,6 +56,7 @@ namespace HueFestivalTicket.Controllers
         // PUT: api/TypeLocations/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
+        [Authorize(Policy = "ManagerPolicy")]
         public async Task<IActionResult> PutTypeLocation(Guid id, [FromForm] TypeLocationDTO typeLocation)
         {
             var oldTypeLocation = await _typeLocationRepository.GetTypeLocationByIdAsync(id);
@@ -90,6 +92,7 @@ namespace HueFestivalTicket.Controllers
         // POST: api/TypeLocations
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [Authorize(Policy = "ManagerPolicy")]
         public async Task<ActionResult<TypeLocation>> PostTypeLocation([FromForm] TypeLocationDTO typeLocation)
         {
             if (typeLocation.Name == null || await _typeLocationRepository.GetTypeLocationByNameAsync(typeLocation.Name) != null)
@@ -118,6 +121,7 @@ namespace HueFestivalTicket.Controllers
 
         // DELETE: api/TypeLocations/5
         [HttpDelete("{id}")]
+        [Authorize(Policy = "ManagerPolicy")]
         public async Task<IActionResult> DeleteTypeLocation(Guid id)
         {
             var typeLocation = await _typeLocationRepository.GetTypeLocationByIdAsync(id);

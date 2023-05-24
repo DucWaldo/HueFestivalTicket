@@ -44,6 +44,12 @@ namespace HueFestivalTicket.Repositories
             return imageEvent;
         }
 
+        public async Task<List<ImageEvent>> GetImageEventsWithIdEventAsync(Guid idEvent)
+        {
+            var list = await _dbSet.Where(ie => ie.IdEvent == idEvent).ToListAsync();
+            return list;
+        }
+
         public async Task<List<ImageEvent>> InsertImageEventAsync(ImageEventDTO imageEvent)
         {
             List<ImageEvent> imageEvents = new List<ImageEvent>();

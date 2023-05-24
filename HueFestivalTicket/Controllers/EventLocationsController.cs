@@ -2,6 +2,7 @@
 using HueFestivalTicket.Data;
 using HueFestivalTicket.Models;
 using HueFestivalTicket.Repositories.IRepositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HueFestivalTicket.Controllers
@@ -14,12 +15,19 @@ namespace HueFestivalTicket.Controllers
         private readonly IEventLocationRepository _eventLocationRepository;
         private readonly IEventRepository _eventRepository;
         private readonly ILocationRepository _locationRepository;
-        public EventLocationsController(ApplicationDbContext context, IEventLocationRepository eventLocationRepository, ILocationRepository locationRepository, IEventRepository eventRepository)
+        private readonly IPriceTicketRepository _priceTicketRepository;
+
+        public EventLocationsController(ApplicationDbContext context,
+            IEventLocationRepository eventLocationRepository,
+            ILocationRepository locationRepository,
+            IEventRepository eventRepository,
+            IPriceTicketRepository priceTicketRepository)
         {
             _context = context;
             _eventLocationRepository = eventLocationRepository;
             _locationRepository = locationRepository;
             _eventRepository = eventRepository;
+            _priceTicketRepository = priceTicketRepository;
         }
 
         // GET: api/EventLocations
@@ -51,12 +59,19 @@ namespace HueFestivalTicket.Controllers
                 });
             }
 
-            return eventLocation;
+            var priceTicket = await _priceTicketRepository.GetPriceTicketByIdEventLocationAsync(eventLocation.IdEventLocation);
+
+            return Ok(new
+            {
+                eventLocation,
+                priceTicket
+            });
         }
 
         // PUT: api/EventLocations/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
+        [Authorize(Policy = "ManagerPolicy")]
         public async Task<IActionResult> PutEventLocation(Guid id, EventLocationDTO eventLocation)
         {
             var oldEventLocation = await _eventLocationRepository.GetEventLocationByIdAsync(id);
@@ -119,6 +134,7 @@ namespace HueFestivalTicket.Controllers
         // PUT: api/EventLocations/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("UpdateStatus")]
+        [Authorize(Policy = "ManagerPolicy")]
         public async Task<IActionResult> UpdateStatusEventLocation(Guid id, bool status)
         {
             var eventLocation = await _eventLocationRepository.GetEventLocationByIdAsync(id);
@@ -153,6 +169,7 @@ namespace HueFestivalTicket.Controllers
         // POST: api/EventLocations
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [Authorize(Policy = "ManagerPolicy")]
         public async Task<ActionResult<EventLocation>> PostEventLocation(EventLocationDTO eventLocation)
         {
             var messageCheck = await _eventLocationRepository.CheckDateTimeEventLocation(eventLocation);
@@ -204,6 +221,7 @@ namespace HueFestivalTicket.Controllers
 
         // DELETE: api/EventLocations/5
         [HttpDelete("{id}")]
+        [Authorize(Policy = "ManagerPolicy")]
         public async Task<IActionResult> DeleteEventLocation(Guid id)
         {
             var eventLocation = await _eventLocationRepository.GetEventLocationByIdAsync(id);

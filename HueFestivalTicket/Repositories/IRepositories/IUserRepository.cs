@@ -8,6 +8,7 @@ namespace HueFestivalTicket.Repositories.IRepositories
     {
         public Task<List<User>> GetAllUsersAsync();
         public Task<User?> GetUserByIdAsync(Guid id);
+        public Task<User?> GetUserByIdAccountAsync(Guid id);
         public Task<User> InsertUserAsync(UserDTO user, Guid idAccount);
         public Task UpdateUserAsync(UserDTO user, User users);
         public Task DeleteUserAsync(User user);

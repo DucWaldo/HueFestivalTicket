@@ -6,6 +6,7 @@ using HueFestivalTicket.Models;
 using HueFestivalTicket.Repositories.IRepositories;
 using MailKit.Net.Smtp;
 using MailKit.Security;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MimeKit;
 
@@ -54,6 +55,7 @@ namespace HueFestivalTicket.Controllers
 
         // GET: api/Tickets
         [HttpGet]
+        [Authorize(Policy = "ManagerOrStaff")]
         public async Task<ActionResult<IEnumerable<Ticket>>> GetTickets()
         {
             return await _ticketRepository.GetAllTicketsAsync();
@@ -61,6 +63,7 @@ namespace HueFestivalTicket.Controllers
 
         // GET: api/Tickets/Paging
         [HttpGet("Paging")]
+        [Authorize(Policy = "ManagerOrStaff")]
         public async Task<ActionResult<IEnumerable<Ticket>>> GetTicketPaging(int pageNumber, int pageSize)
         {
             var result = await _ticketRepository.GetTicketPagingAsync(pageNumber, pageSize);
@@ -69,6 +72,7 @@ namespace HueFestivalTicket.Controllers
 
         // GET: api/Tickets/5
         [HttpGet("{numberTicket}")]
+        [Authorize(Policy = "ManagerOrStaff")]
         public async Task<ActionResult<Ticket>> GetTicket(string numberTicket)
         {
             var ticket = await _ticketRepository.GetTicketByTicketNumberAsync(numberTicket);
@@ -84,10 +88,10 @@ namespace HueFestivalTicket.Controllers
             return ticket;
         }
 
-        /*
         // POST: api/Tickets
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [Authorize(Policy = "ManagerOrStaff")]
         public async Task<ActionResult<Ticket>> PostTicket([FromForm] TicketDTO ticket)
         {
             var eventLocation = await _eventLocationRepository.GetEventLocationByIdAsync(ticket.IdEventLocation);
@@ -167,12 +171,11 @@ namespace HueFestivalTicket.Controllers
                 list
             });
         }
-        */
 
         // POST: api/Tickets/BeforePayment
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost("BeforePayment")]
-        public async Task<ActionResult<Ticket>> PostTicketBeforePayment([FromForm] TicketDTO ticket)
+        [HttpPost("BookTicket")]
+        public async Task<ActionResult<Ticket>> PostBookTicketPayment([FromForm] TicketDTO ticket)
         {
             var eventLocation = await _eventLocationRepository.GetEventLocationByIdAsync(ticket.IdEventLocation);
             if (eventLocation == null)
@@ -230,11 +233,11 @@ namespace HueFestivalTicket.Controllers
                 });
             }
 
-            var newInvoice = new InvoiceDTO
-            {
-                IdCustomer = customer.IdCustomer,
-                Total = priceTicket.Price * ticket.Number
-            };
+            //var newInvoice = new InvoiceDTO
+            //{
+            //IdCustomer = customer.IdCustomer,
+            //Total = priceTicket.Price * ticket.Number
+            //};
             //var invoice = await _invoiceRepository.InsertInvoiceAsync(newInvoice);
             //var payment = _paymentRepository.Payment(invoice.IdInvoice, invoice.Total, ticket);
             var payment = _paymentRepository.Payment(Guid.NewGuid(), priceTicket.Price * ticket.Number, ticket);
@@ -308,7 +311,7 @@ namespace HueFestivalTicket.Controllers
                         SendEmail(invoices!.Customer!.Email!, list);
                         return Ok(new
                         {
-                            Message = $"Thanh toán thành công hoá đơn {orderId}, vui lòng truy cập vào email {invoice.Customer.Email} của bạn để nhận vé",
+                            Message = $"Thanh toán thành công hoá đơn {orderId}, vui lòng truy cập vào email {invoices.Customer.Email} của bạn để nhận vé",
                             list
                         });
                     }

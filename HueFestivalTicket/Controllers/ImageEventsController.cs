@@ -2,6 +2,7 @@
 using HueFestivalTicket.Data;
 using HueFestivalTicket.Models;
 using HueFestivalTicket.Repositories.IRepositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HueFestivalTicket.Controllers
@@ -25,23 +26,36 @@ namespace HueFestivalTicket.Controllers
 
         // GET: api/ImageEvents
         [HttpGet]
+        [Authorize(Policy = "ManagerOrStaff")]
         public async Task<ActionResult<IEnumerable<ImageEvent>>> GetImageEvents()
         {
-            if (_context.ImageEvents == null)
-            {
-                return NotFound();
-            }
             return await _imageEventRepository.GetAllImageEventsAsync();
+        }
+
+        // GET: api/ImageEvents
+        [HttpGet("ImageEventsWithIdEvent")]
+        public async Task<ActionResult<IEnumerable<ImageEvent>>> GetImageEventsWithIdEvent(Guid idEvent)
+        {
+            var @event = await _eventRepository.GetEventByIdAsync(idEvent);
+            if (@event == null)
+            {
+                return Ok(new
+                {
+                    Message = "This event doesn't exist"
+                });
+            }
+            var result = await _imageEventRepository.GetImageEventsWithIdEventAsync(@event.IdEvent);
+            return Ok(new
+            {
+                result
+            });
         }
 
         // GET: api/ImageEvents/5
         [HttpGet("{id}")]
+        [Authorize(Policy = "ManagerOrStaff")]
         public async Task<ActionResult<ImageEvent>> GetImageEventById(Guid id)
         {
-            if (_context.ImageEvents == null)
-            {
-                return NotFound();
-            }
             var imageEvent = await _imageEventRepository.GetImageEventByIdAsync(id);
 
             if (imageEvent == null)
@@ -57,9 +71,9 @@ namespace HueFestivalTicket.Controllers
         // PUT: api/ImageEvents/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
+        [Authorize(Policy = "ManagerOrStaff")]
         public async Task<IActionResult> PutImageEvent(IFormFile file, Guid id)
         {
-
             var oldImageEvent = await _imageEventRepository.GetImageEventByIdAsync(id);
             if (oldImageEvent == null)
             {
@@ -87,13 +101,9 @@ namespace HueFestivalTicket.Controllers
         // POST: api/ImageEvents
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [Authorize(Policy = "ManagerOrStaff")]
         public async Task<ActionResult<ImageEvent>> PostImageEvent([FromForm] ImageEventDTO imageEvent)
         {
-            if (_context.ImageEvents == null)
-            {
-                return Problem("Entity set 'ApplicationDbContext.ImageEvents'  is null.");
-            }
-
             if (await _eventRepository.GetEventByIdAsync(imageEvent.IdEvent) == null)
             {
                 return Ok(new
@@ -120,12 +130,9 @@ namespace HueFestivalTicket.Controllers
 
         // DELETE: api/ImageEvents/5
         [HttpDelete("{id}")]
+        [Authorize(Policy = "ManagerOrStaff")]
         public async Task<IActionResult> DeleteImageEvent(Guid id)
         {
-            if (_context.ImageEvents == null)
-            {
-                return NotFound();
-            }
             var imageEvent = await _imageEventRepository.GetImageEventByIdAsync(id);
             if (imageEvent == null)
             {

@@ -27,6 +27,12 @@ namespace HueFestivalTicket.Repositories
             return await GetAllWithIncludesAsync(u => u.Account!.Role!);
         }
 
+        public async Task<User?> GetUserByIdAccountAsync(Guid id)
+        {
+            var result = await _dbSet.FirstOrDefaultAsync(u => u.IdAccount == id);
+            return result;
+        }
+
         public async Task<User?> GetUserByIdAsync(Guid id)
         {
             var user = await _dbSet.FirstOrDefaultAsync(u => u.IdUser == id);

@@ -25,10 +25,6 @@ namespace HueFestivalTicket.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Support>>> GetSupports()
         {
-            if (_context.Supports == null)
-            {
-                return NotFound();
-            }
             return await _supportRepository.GetAllSupportAsync();
         }
 
@@ -36,10 +32,6 @@ namespace HueFestivalTicket.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<Support>> GetSupport(Guid id)
         {
-            if (_context.Supports == null)
-            {
-                return NotFound();
-            }
             var support = await _supportRepository.GetSupportByIdAsync(id);
 
             if (support == null)
@@ -56,6 +48,7 @@ namespace HueFestivalTicket.Controllers
         // PUT: api/Supports/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
+        [Authorize(Policy = "ManagerPolicy")]
         public async Task<IActionResult> PutSupport(Guid id, SupportDTO newSupport)
         {
             var oldSupport = await _supportRepository.GetSupportByIdAsync(id);
@@ -87,13 +80,9 @@ namespace HueFestivalTicket.Controllers
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         [Authorize]
+        [Authorize(Policy = "ManagerPolicy")]
         public async Task<ActionResult<Support>> PostSupport(SupportDTO support)
         {
-            if (_context.Supports == null)
-            {
-                return Problem("Entity set 'ApplicationDbContext.Supports'  is null.");
-            }
-
             var checkTitle = await _supportRepository.GetSupportByTitleAsync(support.Title ?? "");
 
             if (checkTitle != null)
@@ -115,12 +104,9 @@ namespace HueFestivalTicket.Controllers
 
         // DELETE: api/Supports/5
         [HttpDelete("{id}")]
+        [Authorize(Policy = "ManagerPolicy")]
         public async Task<IActionResult> DeleteSupport(Guid id)
         {
-            if (_context.Supports == null)
-            {
-                return NotFound();
-            }
             var support = await _supportRepository.GetSupportByIdAsync(id);
             if (support == null)
             {

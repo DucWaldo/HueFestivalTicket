@@ -2,6 +2,7 @@
 using HueFestivalTicket.Data;
 using HueFestivalTicket.Models;
 using HueFestivalTicket.Repositories.IRepositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
@@ -10,6 +11,7 @@ namespace HueFestivalTicket.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize(Policy = "AdminOrManager")]
     public class UsersController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -61,7 +63,6 @@ namespace HueFestivalTicket.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutUser(Guid id, UserDTO user)
         {
-
             var users = await _context.Users.FirstOrDefaultAsync(x => x.IdUser == id);
             if (users == null)
             {
@@ -100,10 +101,6 @@ namespace HueFestivalTicket.Controllers
         [HttpPost]
         public async Task<ActionResult<User>> PostUser(UserDTO user)
         {
-            if (_context.Users == null)
-            {
-                return Problem("Entity set 'ApplicationDbContext.Users'  is null.");
-            }
             var users = await _context.Users.FirstOrDefaultAsync(u => u.PhoneNumber == user.PhoneNumber || u.Email == user.Email);
             if (users != null)
             {
@@ -123,7 +120,7 @@ namespace HueFestivalTicket.Controllers
                 });
             }
 
-            var getRole = await _roleRepository.GetIdRoleByNameAsync("User");
+            var getRole = await _roleRepository.GetIdRoleByNameAsync("Staff");
             if (getRole == Guid.Empty)
             {
                 return Ok(new

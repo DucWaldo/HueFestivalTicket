@@ -7,6 +7,7 @@ namespace HueFestivalTicket.Repositories.IRepositories
     public interface IImageEventRepository : IRepository<ImageEvent>
     {
         public Task<List<ImageEvent>> GetAllImageEventsAsync();
+        public Task<List<ImageEvent>> GetImageEventsWithIdEventAsync(Guid idEvent);
         public Task<ImageEvent?> GetImageEventByIdAsync(Guid id);
         public Task<ImageEvent?> GetImageEventByUrlAsync(string url);
         public Task<List<ImageEvent>> InsertImageEventAsync(ImageEventDTO imageEvent);

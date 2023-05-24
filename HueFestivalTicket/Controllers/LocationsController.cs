@@ -2,6 +2,7 @@
 using HueFestivalTicket.Data;
 using HueFestivalTicket.Models;
 using HueFestivalTicket.Repositories.IRepositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HueFestivalTicket.Controllers
@@ -56,6 +57,7 @@ namespace HueFestivalTicket.Controllers
         // PUT: api/Locations/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
+        [Authorize(Policy = "ManagerPolicy")]
         public async Task<IActionResult> PutLocation(Guid id, [FromForm] LocationDTO newLocation)
         {
             var oldLocation = await _locationRepository.GetLocationByIdAsync(id);
@@ -84,6 +86,7 @@ namespace HueFestivalTicket.Controllers
         // POST: api/Locations
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [Authorize(Policy = "ManagerPolicy")]
         public async Task<ActionResult<Location>> PostLocation([FromForm] LocationDTO location)
         {
             if (_locationRepository.CheckImage(location.ImageUrl) == false)
@@ -113,6 +116,7 @@ namespace HueFestivalTicket.Controllers
 
         // DELETE: api/Locations/5
         [HttpDelete("{id}")]
+        [Authorize(Policy = "ManagerPolicy")]
         public async Task<IActionResult> DeleteLocation(Guid id)
         {
             var location = await _locationRepository.GetLocationByIdAsync(id);

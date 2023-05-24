@@ -1,6 +1,7 @@
 using HueFestivalTicket.Contexts;
 using HueFestivalTicket.Helpers;
 using HueFestivalTicket.Helpers.EmailBuilder;
+using HueFestivalTicket.Middlewares;
 using HueFestivalTicket.Repositories;
 using HueFestivalTicket.Repositories.IRepositories;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -66,26 +67,39 @@ builder.Services.AddAuthentication(options =>
         ClockSkew = TimeSpan.Zero
     };
 });
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminOrStaffOrManager", policy => policy.RequireRole(RoleAssignment.ADMIN, RoleAssignment.MANAGER, RoleAssignment.STAFF));
+    options.AddPolicy("AdminOrManager", policy => policy.RequireRole(RoleAssignment.ADMIN, RoleAssignment.MANAGER));
+    options.AddPolicy("ManagerOrStaff", policy => policy.RequireRole(RoleAssignment.STAFF, RoleAssignment.MANAGER));
+    options.AddPolicy("AdminPolicy", policy => policy.RequireRole(RoleAssignment.ADMIN));
+    options.AddPolicy("ManagerPolicy", policy => policy.RequireRole(RoleAssignment.MANAGER));
+    options.AddPolicy("StaffPolicy", policy => policy.RequireRole(RoleAssignment.STAFF));
+    options.AddPolicy("ReporterPolicy", policy => policy.RequireRole(RoleAssignment.REPORTER));
+});
+
 builder.Services.AddAutoMapper(typeof(AutoMapping).Assembly);
-builder.Services.AddScoped<IRoleRepository, RoleRepository>();
-builder.Services.AddScoped<IEventRepository, EventRepository>();
-builder.Services.AddScoped<IImageEventRepository, ImageEventRepository>();
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddScoped<IAccountRepository, AccountRepository>();
-builder.Services.AddScoped<ITypeLocationRepository, TypeLocationRepository>();
-builder.Services.AddScoped<ISupportRepository, SupportRepository>();
-builder.Services.AddScoped<ILocationRepository, LocationRepository>();
-builder.Services.AddScoped<IEventLocationRepository, EventLocationRepository>();
-builder.Services.AddScoped<INewsRepository, NewsRepository>();
-builder.Services.AddScoped<ITypeTicketRepository, TypeTicketRepository>();
-builder.Services.AddScoped<IPriceTicketRepository, PriceTicketRepository>();
-builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
-builder.Services.AddScoped<IInvoiceRepository, InvoiceRepository>();
-builder.Services.AddScoped<ITicketRepository, TicketRepository>();
-builder.Services.AddScoped<ICheckinRepository, CheckinRepository>();
-builder.Services.AddScoped<ITokenRepository, TokenRepository>();
-builder.Services.AddScoped<IVerifyRepository, VerifyRepository>();
-builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
+
+builder.Services.AddScoped<IRoleRepository, RoleRepository>()
+        .AddScoped<IEventRepository, EventRepository>()
+        .AddScoped<IImageEventRepository, ImageEventRepository>()
+        .AddScoped<IUserRepository, UserRepository>()
+        .AddScoped<IAccountRepository, AccountRepository>()
+        .AddScoped<ITypeLocationRepository, TypeLocationRepository>()
+        .AddScoped<ISupportRepository, SupportRepository>()
+        .AddScoped<ILocationRepository, LocationRepository>()
+        .AddScoped<IEventLocationRepository, EventLocationRepository>()
+        .AddScoped<INewsRepository, NewsRepository>()
+        .AddScoped<ITypeTicketRepository, TypeTicketRepository>()
+        .AddScoped<IPriceTicketRepository, PriceTicketRepository>()
+        .AddScoped<ICustomerRepository, CustomerRepository>()
+        .AddScoped<IInvoiceRepository, InvoiceRepository>()
+        .AddScoped<ITicketRepository, TicketRepository>()
+        .AddScoped<ICheckinRepository, CheckinRepository>()
+        .AddScoped<ITokenRepository, TokenRepository>()
+        .AddScoped<IVerifyRepository, VerifyRepository>()
+        .AddScoped<IPaymentRepository, PaymentRepository>();
 
 builder.Services.AddScoped<EmailBuilderWithCloudinary>();
 builder.Services.AddScoped<EmailBuilder>();

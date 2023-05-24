@@ -2,6 +2,7 @@
 using HueFestivalTicket.Data;
 using HueFestivalTicket.Models;
 using HueFestivalTicket.Repositories.IRepositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HueFestivalTicket.Controllers
@@ -54,6 +55,7 @@ namespace HueFestivalTicket.Controllers
         // PUT: api/Events/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
+        [Authorize(Policy = "ManagerPolicy")]
         public async Task<IActionResult> PutEvent(Guid id, EventDTO newEvent)
         {
             var oldEvent = await _eventRepository.GetEventByIdAsync(id);
@@ -84,6 +86,7 @@ namespace HueFestivalTicket.Controllers
         // POST: api/Events
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [Authorize(Policy = "ManagerPolicy")]
         public async Task<ActionResult<Event>> PostEvent(EventDTO @event)
         {
             var eventName = await _eventRepository.GetEventByNameAsync(@event.Name ?? "");
@@ -113,6 +116,7 @@ namespace HueFestivalTicket.Controllers
 
         // DELETE: api/Events/5
         [HttpDelete("{id}")]
+        [Authorize(Policy = "ManagerPolicy")]
         public async Task<IActionResult> DeleteEvent(Guid id)
         {
             var @event = await _eventRepository.GetEventByIdAsync(id);

@@ -15,16 +15,21 @@ namespace HueFestivalTicket.Controllers
         private readonly ApplicationDbContext _context;
         private readonly IAccountRepository _accountRepository;
         private readonly IVerifyRepository _verifyRepository;
+        private readonly IRoleRepository _roleRepository;
+        private readonly IUserRepository _userRepository;
 
-        public AccountsController(ApplicationDbContext context, IAccountRepository accountRepository, IVerifyRepository verifyRepository)
+        public AccountsController(ApplicationDbContext context, IAccountRepository accountRepository, IVerifyRepository verifyRepository, IRoleRepository roleRepository, IUserRepository userRepository)
         {
             _context = context;
             _accountRepository = accountRepository;
             _verifyRepository = verifyRepository;
+            _roleRepository = roleRepository;
+            _userRepository = userRepository;
         }
 
         // GET: api/Accounts
         [HttpGet]
+        [Authorize(Policy = "AdminOrManager")]
         public async Task<ActionResult<IEnumerable<Account>>> GetAccounts()
         {
             return await _accountRepository.GetAllAccountAsync();
@@ -32,6 +37,7 @@ namespace HueFestivalTicket.Controllers
 
         // GET: api/Accounts/5
         [HttpGet("{id}")]
+        [Authorize(Policy = "AdminOrManager")]
         public async Task<ActionResult<Account>> GetAccount(Guid id)
         {
             var account = await _accountRepository.GetAccountByIdAsync(id);
@@ -47,7 +53,44 @@ namespace HueFestivalTicket.Controllers
             return account;
         }
 
-        // GET: api/Accounts/5
+        // PUT: api/Accounts/UpdateRole
+        [HttpPut("UpdateRole")]
+        [Authorize(Policy = "AdminOrManager")]
+        public async Task<ActionResult> UpdateRole(Guid idAccount, string roleName)
+        {
+            var idRole = await _roleRepository.GetIdRoleByNameAsync(roleName);
+            if (idRole == Guid.Empty)
+            {
+                return Ok(new
+                {
+                    Message = "This role doesn't exist"
+                });
+            }
+            var account = await _accountRepository.GetAccountByIdAsync(idAccount);
+            if (account == null)
+            {
+                return Ok(new
+                {
+                    Message = "This account doesn't exist"
+                });
+            }
+
+            if (idRole == account.IdRole)
+            {
+                return Ok(new
+                {
+                    Message = "Roles have not changed"
+                });
+            }
+
+            await _accountRepository.UpdateRoleAsync(account, idRole);
+            return Ok(new
+            {
+                Message = "Update Success"
+            });
+        }
+
+        // PUT: api/Accounts/ChangePassword
         [HttpPut("ChangePassword")]
         [Authorize]
         public async Task<ActionResult<Account>> ChangePassword(string oldPassword, string newPassword, string verifyCode)
@@ -76,45 +119,31 @@ namespace HueFestivalTicket.Controllers
             });
         }
 
-        [HttpGet("acc")]
+        [HttpGet("AccountToken")]
         [Authorize]
-        public IActionResult Get()
+        public async Task<ActionResult> Get()
         {
             var IdAccount = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (IdAccount == null)
+            {
+                return Ok(new
+                {
+                    Message = "This Token Invalid"
+                });
+            }
+            var account = await _accountRepository.GetAccountByIdAsync(Guid.Parse(IdAccount));
+            if (account == null)
+            {
+                return Ok(new
+                {
+                    Message = "This Account doesn't exist"
+                });
+            }
+            var user = await _userRepository.GetUserByIdAccountAsync(account.IdAccount);
             return Ok(new
             {
-                IdAccount
+                user
             });
         }
-
-        /*
-        [HttpPost("Register")]
-        public async Task<IActionResult> Register([FromBody] AccountDTO account)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-
-            if (await _context.Accounts.AnyAsync(x => x.Username == account.Username))
-            {
-                return BadRequest("Email already exists");
-            }
-
-            var acc = new Account
-            {
-                Username = account.Username,
-                Password = Generate.GetMD5Hash(account.Password ?? ""),
-                IsActive = true,
-                TimeJoined = DateTime.UtcNow,
-                IdRole = Guid.Parse("018cceb3-5aa7-4283-e3f5-08db49dc998c")
-            };
-
-            await _context.Accounts.AddAsync(acc);
-            await _context.SaveChangesAsync();
-
-            return Ok();
-        }
-        */
     }
 }

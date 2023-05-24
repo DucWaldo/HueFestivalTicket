@@ -56,7 +56,7 @@ namespace HueFestivalTicket.Controllers
         // PUT: api/News/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        [Authorize]
+        [Authorize(Policy = "ReporterPolicy")]
         public async Task<IActionResult> PutNews(Guid id, [FromForm] NewsDTO news)
         {
             var oldNews = await _newsRepository.GetNewsByIdAsync(id);
@@ -99,7 +99,7 @@ namespace HueFestivalTicket.Controllers
         // POST: api/News
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        [Authorize]
+        [Authorize(Policy = "ReporterPolicy")]
         public async Task<ActionResult<News>> PostNews([FromForm] NewsDTO news)
         {
             if (news.ImageUrl == null)
@@ -127,6 +127,7 @@ namespace HueFestivalTicket.Controllers
 
         // DELETE: api/News/5
         [HttpDelete("{id}")]
+        [Authorize(Policy = "ReporterPolicy")]
         public async Task<IActionResult> DeleteNews(Guid id)
         {
             var news = await _newsRepository.GetNewsByIdAsync(id);
@@ -148,7 +149,7 @@ namespace HueFestivalTicket.Controllers
 
         // GET: api/News
         [HttpGet("Account")]
-        [Authorize]
+        [Authorize(Policy = "ReporterPolicy")]
         public async Task<ActionResult<IEnumerable<News>>> GetNewsByAccount()
         {
             return await _newsRepository.GetAllNewsByAccountAsync(Guid.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value));

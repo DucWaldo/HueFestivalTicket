@@ -13,5 +13,6 @@ namespace HueFestivalTicket.Repositories.IRepositories
         public Task DeleteAccountAsync(Account account);
         public Task<bool> CheckUsernameAsync(string username);
         public Task ChangePasswordAsync(string username, string password);
+        public Task UpdateRoleAsync(Account account, Guid idRole);
     }
 }

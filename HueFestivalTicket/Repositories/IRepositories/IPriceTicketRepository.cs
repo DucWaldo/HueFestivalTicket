@@ -7,6 +7,7 @@ namespace HueFestivalTicket.Repositories.IRepositories
     public interface IPriceTicketRepository : IRepository<PriceTicket>
     {
         public Task<List<PriceTicket>> GetAllPriceTicketAsync();
+        public Task<List<PriceTicket>> GetPriceTicketByIdEventLocationAsync(Guid idEventLocation);
         public Task<PriceTicket?> GetPriceTicketByIdAsync(Guid id);
         public Task<PriceTicket?> GetPriceTicketByIdEventLocationAndIdTypeTicketAsync(Guid idEventLocation, Guid idTypeTicket);
         public Task<List<PriceTicket>> GetNumberSlotPriceTicketAsync(Guid id);

@@ -1,5 +1,4 @@
-﻿using HueFestivalTicket.Contexts;
-using HueFestivalTicket.Data;
+﻿using HueFestivalTicket.Data;
 using HueFestivalTicket.Models;
 using HueFestivalTicket.Repositories.IRepositories;
 using Microsoft.AspNetCore.Authorization;
@@ -17,21 +16,18 @@ namespace HueFestivalTicket.Middlewares
     [ApiController]
     public class AuthsController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
         private readonly IConfiguration _configuration;
         private readonly IAccountRepository _accountRepository;
         private readonly IRoleRepository _roleRepository;
         private readonly ITokenRepository _tokenRepository;
         private readonly IVerifyRepository _verifyRepository;
 
-        public AuthsController(ApplicationDbContext context,
-            IConfiguration configuration,
+        public AuthsController(IConfiguration configuration,
             IAccountRepository accountRepository,
             ITokenRepository tokenRepository,
             IRoleRepository roleRepository,
             IVerifyRepository verifyRepository)
         {
-            _context = context;
             _configuration = configuration;
             _accountRepository = accountRepository;
             _tokenRepository = tokenRepository;
@@ -257,11 +253,11 @@ namespace HueFestivalTicket.Middlewares
 
         private void SendVerificationCode(string phoneNumber, string resetCode)
         {
-            var accountSid = "ACedc47febc9fb9ec166272b2d799d711a";
-            var authToken = "3d48725a1b604a2bf493e75746687a82";
-            var twilioPhoneNumber = "+12763986630";
+            var accountSid = _configuration["Twilio:accountSid"];
+            var authToken = _configuration["Twilio:authToken"]!.Split("|");
+            var twilioPhoneNumber = _configuration["Twilio:twilioPhoneNumber"];
 
-            TwilioClient.Init(accountSid, authToken);
+            TwilioClient.Init(accountSid, authToken[0] + authToken[2]);
 
             var messageOptions = new CreateMessageOptions(new PhoneNumber(Generate.GetPhoneNumber(phoneNumber)));
             messageOptions.From = new PhoneNumber(twilioPhoneNumber);

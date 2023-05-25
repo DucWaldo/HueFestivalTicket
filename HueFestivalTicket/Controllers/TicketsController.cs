@@ -119,12 +119,12 @@ namespace HueFestivalTicket.Controllers
                     Message = "This Type Ticket doesn't exist"
                 });
             }
-            var customer = await _customerRepository.GetCustomerByIdAsync(ticket.IdCustomer);
+            var customer = await _customerRepository.GetCustomerByIdCardAsync(ticket.IdCardCustomer ?? "");
             if (customer == null)
             {
                 return Ok(new
                 {
-                    Message = "This Customer doesn't exist"
+                    Message = "This Customer doesn't exist, please check again or add new customer information"
                 });
             }
             var priceTicket = await _priceTicketRepository.GetPriceTicketByIdEventLocationAndIdTypeTicketAsync(ticket.IdEventLocation, ticket.IdTypeTicket);
@@ -201,12 +201,12 @@ namespace HueFestivalTicket.Controllers
                     Message = "This Type Ticket doesn't exist"
                 });
             }
-            var customer = await _customerRepository.GetCustomerByIdAsync(ticket.IdCustomer);
+            var customer = await _customerRepository.GetCustomerByIdCardAsync(ticket.IdCardCustomer ?? "");
             if (customer == null)
             {
                 return Ok(new
                 {
-                    Message = "This Customer doesn't exist"
+                    Message = "This Customer doesn't exist, please check again or add new customer information"
                 });
             }
             var priceTicket = await _priceTicketRepository.GetPriceTicketByIdEventLocationAndIdTypeTicketAsync(ticket.IdEventLocation, ticket.IdTypeTicket);
@@ -279,18 +279,18 @@ namespace HueFestivalTicket.Controllers
                         {
                             IdEventLocation = Guid.Parse(vnp_OrderInfo[0]),
                             IdTypeTicket = Guid.Parse(vnp_OrderInfo[1]),
-                            IdCustomer = Guid.Parse(vnp_OrderInfo[2]),
+                            IdCardCustomer = vnp_OrderInfo[2],
                             Number = int.Parse(vnp_OrderInfo[3]),
                         };
                         var eventLocation = await _eventLocationRepository.GetEventLocationByIdAsync(ticket.IdEventLocation);
                         var typeTicket = await _typeTicketRepository.GetTypeTicketByIdAsync(ticket.IdTypeTicket);
                         var priceTicket = await _priceTicketRepository.GetPriceTicketByIdEventLocationAndIdTypeTicketAsync(ticket.IdEventLocation, ticket.IdTypeTicket);
                         //
-
+                        var customer = await _customerRepository.GetCustomerByIdCardAsync(ticket.IdCardCustomer ?? "");
                         var newInvoice = new InvoiceDTO
                         {
                             IdInvoice = Guid.Parse(orderId),
-                            IdCustomer = ticket.IdCustomer,
+                            IdCustomer = customer!.IdCustomer,
                             Total = decimal.Parse(vnp_Amount) / 100
                         };
                         var invoice = await _invoiceRepository.InsertInvoiceAsync(newInvoice);

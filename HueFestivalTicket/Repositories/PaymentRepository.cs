@@ -22,7 +22,7 @@ namespace HueFestivalTicket.Repositories
             string returnUrl = "https://localhost:7099/api/Tickets/AfterPayment";
             string tmnCode = _configuration["VnPay:TmnCode"] ?? "";
             string hashSecret = _configuration["VnPay:HashSecret"] ?? "";
-            string orderInfo = ticket.IdEventLocation + "|" + ticket.IdTypeTicket + "|" + ticket.IdCustomer + "|" + ticket.Number;
+            string orderInfo = ticket.IdEventLocation + "|" + ticket.IdTypeTicket + "|" + ticket.IdCardCustomer + "|" + ticket.Number;
 
             PayLib pay = new PayLib();
 

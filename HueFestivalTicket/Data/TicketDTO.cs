@@ -4,7 +4,7 @@
     {
         public Guid IdEventLocation { get; set; }
         public Guid IdTypeTicket { get; set; }
-        public Guid IdCustomer { get; set; }
+        public string? IdCardCustomer { get; set; }
         public int Number { get; set; }
     }
 }

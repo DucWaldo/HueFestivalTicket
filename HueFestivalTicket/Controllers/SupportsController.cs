@@ -1,5 +1,4 @@
-﻿using HueFestivalTicket.Contexts;
-using HueFestivalTicket.Data;
+﻿using HueFestivalTicket.Data;
 using HueFestivalTicket.Models;
 using HueFestivalTicket.Repositories.IRepositories;
 using Microsoft.AspNetCore.Authorization;
@@ -12,12 +11,10 @@ namespace HueFestivalTicket.Controllers
     [ApiController]
     public class SupportsController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
         private readonly ISupportRepository _supportRepository;
 
-        public SupportsController(ApplicationDbContext context, ISupportRepository supportRepository)
+        public SupportsController(ISupportRepository supportRepository)
         {
-            _context = context;
             _supportRepository = supportRepository;
         }
 
@@ -46,7 +43,6 @@ namespace HueFestivalTicket.Controllers
         }
 
         // PUT: api/Supports/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         [Authorize(Policy = "ManagerPolicy")]
         public async Task<IActionResult> PutSupport(Guid id, SupportDTO newSupport)
@@ -77,7 +73,6 @@ namespace HueFestivalTicket.Controllers
         }
 
         // POST: api/Supports
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         [Authorize]
         [Authorize(Policy = "ManagerPolicy")]

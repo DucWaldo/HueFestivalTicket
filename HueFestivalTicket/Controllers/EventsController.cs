@@ -1,5 +1,4 @@
-﻿using HueFestivalTicket.Contexts;
-using HueFestivalTicket.Data;
+﻿using HueFestivalTicket.Data;
 using HueFestivalTicket.Models;
 using HueFestivalTicket.Repositories.IRepositories;
 using Microsoft.AspNetCore.Authorization;
@@ -11,12 +10,10 @@ namespace HueFestivalTicket.Controllers
     [ApiController]
     public class EventsController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
         private readonly IEventRepository _eventRepository;
 
-        public EventsController(ApplicationDbContext context, IEventRepository eventRepository)
+        public EventsController(IEventRepository eventRepository)
         {
-            _context = context;
             _eventRepository = eventRepository;
         }
 
@@ -53,7 +50,6 @@ namespace HueFestivalTicket.Controllers
         }
 
         // PUT: api/Events/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         [Authorize(Policy = "ManagerPolicy")]
         public async Task<IActionResult> PutEvent(Guid id, EventDTO newEvent)
@@ -84,7 +80,6 @@ namespace HueFestivalTicket.Controllers
         }
 
         // POST: api/Events
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         [Authorize(Policy = "ManagerPolicy")]
         public async Task<ActionResult<Event>> PostEvent(EventDTO @event)

@@ -1,5 +1,4 @@
-﻿using HueFestivalTicket.Contexts;
-using HueFestivalTicket.Data;
+﻿using HueFestivalTicket.Data;
 using HueFestivalTicket.Models;
 using HueFestivalTicket.Repositories.IRepositories;
 using Microsoft.AspNetCore.Authorization;
@@ -11,15 +10,11 @@ namespace HueFestivalTicket.Controllers
     [ApiController]
     public class ImageEventsController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
-        private readonly IWebHostEnvironment _environment;
         private readonly IImageEventRepository _imageEventRepository;
         private readonly IEventRepository _eventRepository;
 
-        public ImageEventsController(ApplicationDbContext context, IWebHostEnvironment environment, IImageEventRepository imageEventRepository, IEventRepository eventRepository)
+        public ImageEventsController(IImageEventRepository imageEventRepository, IEventRepository eventRepository)
         {
-            _context = context;
-            _environment = environment;
             _imageEventRepository = imageEventRepository;
             _eventRepository = eventRepository;
         }
@@ -69,7 +64,6 @@ namespace HueFestivalTicket.Controllers
         }
 
         // PUT: api/ImageEvents/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         [Authorize(Policy = "ManagerOrStaff")]
         public async Task<IActionResult> PutImageEvent(IFormFile file, Guid id)
@@ -99,7 +93,6 @@ namespace HueFestivalTicket.Controllers
         }
 
         // POST: api/ImageEvents
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         [Authorize(Policy = "ManagerOrStaff")]
         public async Task<ActionResult<ImageEvent>> PostImageEvent([FromForm] ImageEventDTO imageEvent)

@@ -1,5 +1,4 @@
-﻿using HueFestivalTicket.Contexts;
-using HueFestivalTicket.Data;
+﻿using HueFestivalTicket.Data;
 using HueFestivalTicket.Helpers.EmailBuilder;
 using HueFestivalTicket.Helpers.Payment;
 using HueFestivalTicket.Models;
@@ -16,7 +15,6 @@ namespace HueFestivalTicket.Controllers
     [ApiController]
     public class TicketsController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
         private readonly ITicketRepository _ticketRepository;
         private readonly IInvoiceRepository _invoiceRepository;
         private readonly IPriceTicketRepository _priceTicketRepository;
@@ -29,8 +27,7 @@ namespace HueFestivalTicket.Controllers
         private readonly IPaymentRepository _paymentRepository;
 
 
-        public TicketsController(ApplicationDbContext context,
-            ITicketRepository ticketRepository,
+        public TicketsController(ITicketRepository ticketRepository,
             IInvoiceRepository invoiceRepository,
             IPriceTicketRepository priceTicketRepository,
             IEventLocationRepository eventLocationRepository,
@@ -40,7 +37,6 @@ namespace HueFestivalTicket.Controllers
             IWebHostEnvironment environment,
             IPaymentRepository paymentRepository)
         {
-            _context = context;
             _ticketRepository = ticketRepository;
             _invoiceRepository = invoiceRepository;
             _priceTicketRepository = priceTicketRepository;
@@ -89,7 +85,6 @@ namespace HueFestivalTicket.Controllers
         }
 
         // POST: api/Tickets
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         [Authorize(Policy = "ManagerOrStaff")]
         public async Task<ActionResult<Ticket>> PostTicket([FromForm] TicketDTO ticket)
@@ -173,7 +168,6 @@ namespace HueFestivalTicket.Controllers
         }
 
         // POST: api/Tickets/BeforePayment
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost("BookTicket")]
         public async Task<ActionResult<Ticket>> PostBookTicketPayment([FromForm] TicketDTO ticket)
         {

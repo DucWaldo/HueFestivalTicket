@@ -1,6 +1,4 @@
-﻿using AutoMapper;
-using HueFestivalTicket.Contexts;
-using HueFestivalTicket.Data;
+﻿using HueFestivalTicket.Data;
 using HueFestivalTicket.Models;
 using HueFestivalTicket.Repositories.IRepositories;
 using Microsoft.AspNetCore.Authorization;
@@ -14,12 +12,10 @@ namespace HueFestivalTicket.Controllers
     [Authorize(Policy = "AdminPolicy")]
     public class RolesController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
         private readonly IRoleRepository _roleRepository;
 
-        public RolesController(ApplicationDbContext context, IMapper mapper, IRoleRepository roleRepository)
+        public RolesController(IRoleRepository roleRepository)
         {
-            _context = context;
             _roleRepository = roleRepository;
         }
 
@@ -27,11 +23,6 @@ namespace HueFestivalTicket.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<RoleDTO>>> GetRoles()
         {
-            if (_context.Roles == null)
-            {
-                return NotFound();
-            }
-
             return await _roleRepository.GetAllRolesAsync();
         }
 
@@ -39,12 +30,6 @@ namespace HueFestivalTicket.Controllers
         [HttpGet("{name}")]
         public async Task<ActionResult<RoleDTO>> GetRole(string name)
         {
-
-
-            if (_context.Roles == null)
-            {
-                return NotFound();
-            }
             var role = await _roleRepository.GetRoleByNameAsync(name);
             if (role == null)
             {
@@ -57,7 +42,6 @@ namespace HueFestivalTicket.Controllers
         }
 
         // PUT: api/Roles/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{oldName}")]
         public async Task<IActionResult> PutRole(string oldName, RoleDTO newName)
         {
@@ -87,14 +71,9 @@ namespace HueFestivalTicket.Controllers
         }
 
         // POST: api/Roles
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<Role>> PostRole(RoleDTO role)
         {
-            if (_context.Roles == null)
-            {
-                return Problem("Entity set 'ApplicationDbContext.Roles'  is null.");
-            }
             var roleName = await _roleRepository.GetRoleByNameAsync(role.Name ?? "");
             if (roleName != null)
             {
@@ -116,10 +95,6 @@ namespace HueFestivalTicket.Controllers
         [HttpDelete("{name}")]
         public async Task<IActionResult> DeleteRole(string name)
         {
-            if (_context.Roles == null)
-            {
-                return NotFound();
-            }
             var role = await _roleRepository.GetRoleByNameAsync(name ?? "");
             if (role == null)
             {

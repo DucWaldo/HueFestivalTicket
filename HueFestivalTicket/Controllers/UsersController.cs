@@ -1,10 +1,8 @@
-﻿using HueFestivalTicket.Contexts;
-using HueFestivalTicket.Data;
+﻿using HueFestivalTicket.Data;
 using HueFestivalTicket.Models;
 using HueFestivalTicket.Repositories.IRepositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using System.Text.RegularExpressions;
 
 namespace HueFestivalTicket.Controllers
@@ -14,14 +12,12 @@ namespace HueFestivalTicket.Controllers
     [Authorize(Policy = "AdminOrManager")]
     public class UsersController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
         private readonly IUserRepository _userRepository;
         private readonly IAccountRepository _accountRepository;
         private readonly IRoleRepository _roleRepository;
 
-        public UsersController(ApplicationDbContext context, IUserRepository userRepository, IAccountRepository accountRepository, IRoleRepository roleRepository)
+        public UsersController(IUserRepository userRepository, IAccountRepository accountRepository, IRoleRepository roleRepository)
         {
-            _context = context;
             _userRepository = userRepository;
             _accountRepository = accountRepository;
             _roleRepository = roleRepository;
@@ -31,10 +27,6 @@ namespace HueFestivalTicket.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<User>>> GetUsers()
         {
-            if (_context.Users == null)
-            {
-                return NotFound();
-            }
             return await _userRepository.GetAllUsersAsync();
         }
 
@@ -42,11 +34,7 @@ namespace HueFestivalTicket.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<User>> GetUser(Guid id)
         {
-            if (_context.Users == null)
-            {
-                return NotFound();
-            }
-            var user = await _context.Users.FindAsync(id);
+            var user = await _userRepository.GetUserByIdAsync(id);
 
             if (user == null)
             {
@@ -59,11 +47,10 @@ namespace HueFestivalTicket.Controllers
         }
 
         // PUT: api/Users/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutUser(Guid id, UserDTO user)
         {
-            var users = await _context.Users.FirstOrDefaultAsync(x => x.IdUser == id);
+            var users = await _userRepository.GetUserByIdAsync(id);
             if (users == null)
             {
                 return Ok(new
@@ -80,7 +67,7 @@ namespace HueFestivalTicket.Controllers
                 });
             }
 
-            var check = await _context.Users.Where(c => c.IdUser != users.IdUser).ToListAsync();
+            var check = await _userRepository.GetUserToCheckAsync(users.IdUser);
             if (check.Any(c => c.Email == user.Email || c.PhoneNumber == user.PhoneNumber))
             {
                 return Ok(new
@@ -97,12 +84,11 @@ namespace HueFestivalTicket.Controllers
         }
 
         // POST: api/Users
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<User>> PostUser(UserDTO user)
         {
-            var users = await _context.Users.FirstOrDefaultAsync(u => u.PhoneNumber == user.PhoneNumber || u.Email == user.Email);
-            if (users != null)
+            var users = await _userRepository.CheckPhoneAndEmail(user.PhoneNumber ?? "", user.Email ?? "");
+            if (users == true)
             {
                 return Ok(new
                 {
@@ -142,10 +128,6 @@ namespace HueFestivalTicket.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteUser(Guid id)
         {
-            if (_context.Users == null)
-            {
-                return NotFound();
-            }
             var user = await _userRepository.GetUserByIdAsync(id);
             if (user == null)
             {
@@ -166,7 +148,6 @@ namespace HueFestivalTicket.Controllers
 
             await _userRepository.DeleteUserAsync(user);
             await _accountRepository.DeleteAccountAsync(account);
-            await _context.SaveChangesAsync();
 
             return Ok(new
             {

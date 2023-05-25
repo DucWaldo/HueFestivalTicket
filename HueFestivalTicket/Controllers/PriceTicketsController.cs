@@ -1,5 +1,4 @@
-﻿using HueFestivalTicket.Contexts;
-using HueFestivalTicket.Data;
+﻿using HueFestivalTicket.Data;
 using HueFestivalTicket.Models;
 using HueFestivalTicket.Repositories.IRepositories;
 using Microsoft.AspNetCore.Authorization;
@@ -12,14 +11,12 @@ namespace HueFestivalTicket.Controllers
     [Authorize(Policy = "AdminOrManager")]
     public class PriceTicketsController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
         private readonly IPriceTicketRepository _priceTicketRepository;
         private readonly IEventLocationRepository _eventLocationRepository;
         private readonly ITypeTicketRepository _typeTicketRepository;
 
-        public PriceTicketsController(ApplicationDbContext context, IPriceTicketRepository priceTicketRepository, IEventLocationRepository eventLocationRepository, ITypeTicketRepository typeTicketRepository)
+        public PriceTicketsController(IPriceTicketRepository priceTicketRepository, IEventLocationRepository eventLocationRepository, ITypeTicketRepository typeTicketRepository)
         {
-            _context = context;
             _priceTicketRepository = priceTicketRepository;
             _eventLocationRepository = eventLocationRepository;
             _typeTicketRepository = typeTicketRepository;
@@ -50,7 +47,6 @@ namespace HueFestivalTicket.Controllers
         }
 
         // PUT: api/PriceTickets/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutPriceTicket(Guid id, PriceTicketDTO priceTicket)
         {
@@ -87,7 +83,6 @@ namespace HueFestivalTicket.Controllers
         }
 
         // POST: api/PriceTickets
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<PriceTicket>> PostPriceTicket([FromForm] PriceTicketDTO priceTicket)
         {

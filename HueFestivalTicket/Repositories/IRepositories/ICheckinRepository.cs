@@ -11,5 +11,6 @@ namespace HueFestivalTicket.Repositories.IRepositories
         public Task<Checkin?> GetCheckinByIdAsync(Guid id);
         public Task<Checkin?> GetCheckinAsync(string qrCodeContent);
         public Task<Checkin> InsertCheckinAsync(CheckinDTO Checkin, Guid IdAccount, bool status);
+        public Task DeleteCheckinAsync(Checkin checkin);
     }
 }

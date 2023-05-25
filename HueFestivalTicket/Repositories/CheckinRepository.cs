@@ -13,6 +13,11 @@ namespace HueFestivalTicket.Repositories
         {
         }
 
+        public async Task DeleteCheckinAsync(Checkin checkin)
+        {
+            await DeleteAsync(checkin);
+        }
+
         public async Task<List<Checkin>> GetAllCheckinAsync()
         {
             return await GetAllWithIncludesAsync(c => c.Account!.Role!);

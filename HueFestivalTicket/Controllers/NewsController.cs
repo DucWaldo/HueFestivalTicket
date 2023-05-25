@@ -1,5 +1,4 @@
-﻿using HueFestivalTicket.Contexts;
-using HueFestivalTicket.Data;
+﻿using HueFestivalTicket.Data;
 using HueFestivalTicket.Models;
 using HueFestivalTicket.Repositories.IRepositories;
 using Microsoft.AspNetCore.Authorization;
@@ -12,12 +11,10 @@ namespace HueFestivalTicket.Controllers
     [ApiController]
     public class NewsController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
         private readonly INewsRepository _newsRepository;
 
-        public NewsController(ApplicationDbContext context, INewsRepository newsRepository)
+        public NewsController(INewsRepository newsRepository)
         {
-            _context = context;
             _newsRepository = newsRepository;
         }
 
@@ -54,7 +51,6 @@ namespace HueFestivalTicket.Controllers
         }
 
         // PUT: api/News/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         [Authorize(Policy = "ReporterPolicy")]
         public async Task<IActionResult> PutNews(Guid id, [FromForm] NewsDTO news)
@@ -97,7 +93,6 @@ namespace HueFestivalTicket.Controllers
         }
 
         // POST: api/News
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         [Authorize(Policy = "ReporterPolicy")]
         public async Task<ActionResult<News>> PostNews([FromForm] NewsDTO news)

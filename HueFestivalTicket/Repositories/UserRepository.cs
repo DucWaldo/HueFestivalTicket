@@ -17,6 +17,16 @@ namespace HueFestivalTicket.Repositories
             _mapper = mapper;
         }
 
+        public async Task<bool> CheckPhoneAndEmail(string phone, string email)
+        {
+            var users = await _dbSet.FirstOrDefaultAsync(u => u.PhoneNumber == phone || u.Email == email);
+            if (users == null)
+            {
+                return false;
+            }
+            return true;
+        }
+
         public async Task DeleteUserAsync(User user)
         {
             await DeleteAsync(user);
@@ -37,6 +47,12 @@ namespace HueFestivalTicket.Repositories
         {
             var user = await _dbSet.FirstOrDefaultAsync(u => u.IdUser == id);
             return user;
+        }
+
+        public async Task<List<User>> GetUserToCheckAsync(Guid id)
+        {
+            var result = await _dbSet.Where(c => c.IdUser != id).ToListAsync();
+            return result;
         }
 
         public async Task<User> InsertUserAsync(UserDTO user, Guid idAccount)

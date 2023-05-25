@@ -1,5 +1,4 @@
-﻿using HueFestivalTicket.Contexts;
-using HueFestivalTicket.Data;
+﻿using HueFestivalTicket.Data;
 using HueFestivalTicket.Models;
 using HueFestivalTicket.Repositories.IRepositories;
 using Microsoft.AspNetCore.Authorization;
@@ -11,19 +10,16 @@ namespace HueFestivalTicket.Controllers
     [ApiController]
     public class EventLocationsController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
         private readonly IEventLocationRepository _eventLocationRepository;
         private readonly IEventRepository _eventRepository;
         private readonly ILocationRepository _locationRepository;
         private readonly IPriceTicketRepository _priceTicketRepository;
 
-        public EventLocationsController(ApplicationDbContext context,
-            IEventLocationRepository eventLocationRepository,
+        public EventLocationsController(IEventLocationRepository eventLocationRepository,
             ILocationRepository locationRepository,
             IEventRepository eventRepository,
             IPriceTicketRepository priceTicketRepository)
         {
-            _context = context;
             _eventLocationRepository = eventLocationRepository;
             _locationRepository = locationRepository;
             _eventRepository = eventRepository;
@@ -69,7 +65,6 @@ namespace HueFestivalTicket.Controllers
         }
 
         // PUT: api/EventLocations/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         [Authorize(Policy = "ManagerPolicy")]
         public async Task<IActionResult> PutEventLocation(Guid id, EventLocationDTO eventLocation)
@@ -132,7 +127,6 @@ namespace HueFestivalTicket.Controllers
         }
 
         // PUT: api/EventLocations/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("UpdateStatus")]
         [Authorize(Policy = "ManagerPolicy")]
         public async Task<IActionResult> UpdateStatusEventLocation(Guid id, bool status)
@@ -152,7 +146,7 @@ namespace HueFestivalTicket.Controllers
                     Message = "Nothing Changes"
                 });
             }
-            if (status == true && eventLocation.DateEnd < DateTime.UtcNow)
+            if (status == true && eventLocation.DateEnd < DateTime.Today)
             {
                 return Ok(new
                 {
@@ -167,7 +161,6 @@ namespace HueFestivalTicket.Controllers
         }
 
         // POST: api/EventLocations
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         [Authorize(Policy = "ManagerPolicy")]
         public async Task<ActionResult<EventLocation>> PostEventLocation(EventLocationDTO eventLocation)

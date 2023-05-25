@@ -1,5 +1,4 @@
-﻿using HueFestivalTicket.Contexts;
-using HueFestivalTicket.Data;
+﻿using HueFestivalTicket.Data;
 using HueFestivalTicket.Models;
 using HueFestivalTicket.Repositories.IRepositories;
 using Microsoft.AspNetCore.Authorization;
@@ -12,12 +11,10 @@ namespace HueFestivalTicket.Controllers
     [Authorize(Policy = "ManagerPolicy")]
     public class TypeTicketsController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
         private readonly ITypeTicketRepository _typeTicketRepository;
 
-        public TypeTicketsController(ApplicationDbContext context, ITypeTicketRepository typeTicketRepository)
+        public TypeTicketsController(ITypeTicketRepository typeTicketRepository)
         {
-            _context = context;
             _typeTicketRepository = typeTicketRepository;
         }
 
@@ -46,7 +43,6 @@ namespace HueFestivalTicket.Controllers
         }
 
         // PUT: api/TypeTickets/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutTypeTicket(Guid id, TypeTicketDTO typeTicket)
         {
@@ -73,7 +69,6 @@ namespace HueFestivalTicket.Controllers
         }
 
         // POST: api/TypeTickets
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<TypeTicket>> PostTypeTicket(TypeTicketDTO typeTicket)
         {

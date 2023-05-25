@@ -1,5 +1,4 @@
-﻿using HueFestivalTicket.Contexts;
-using HueFestivalTicket.Middlewares;
+﻿using HueFestivalTicket.Middlewares;
 using HueFestivalTicket.Models;
 using HueFestivalTicket.Repositories.IRepositories;
 using Microsoft.AspNetCore.Authorization;
@@ -12,15 +11,16 @@ namespace HueFestivalTicket.Controllers
     [ApiController]
     public class AccountsController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
         private readonly IAccountRepository _accountRepository;
         private readonly IVerifyRepository _verifyRepository;
         private readonly IRoleRepository _roleRepository;
         private readonly IUserRepository _userRepository;
 
-        public AccountsController(ApplicationDbContext context, IAccountRepository accountRepository, IVerifyRepository verifyRepository, IRoleRepository roleRepository, IUserRepository userRepository)
+        public AccountsController(IAccountRepository accountRepository,
+            IVerifyRepository verifyRepository,
+            IRoleRepository roleRepository,
+            IUserRepository userRepository)
         {
-            _context = context;
             _accountRepository = accountRepository;
             _verifyRepository = verifyRepository;
             _roleRepository = roleRepository;

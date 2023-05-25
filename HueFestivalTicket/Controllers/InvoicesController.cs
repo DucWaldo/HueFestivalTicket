@@ -1,5 +1,4 @@
-﻿using HueFestivalTicket.Contexts;
-using HueFestivalTicket.Models;
+﻿using HueFestivalTicket.Models;
 using HueFestivalTicket.Repositories.IRepositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,13 +10,11 @@ namespace HueFestivalTicket.Controllers
     [Authorize(Policy = "ManagerOrStaff")]
     public class InvoicesController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
         private readonly IInvoiceRepository _invoiceRepository;
         private readonly ICustomerRepository _customerRepository;
 
-        public InvoicesController(ApplicationDbContext context, IInvoiceRepository invoiceRepository, ICustomerRepository customerRepository)
+        public InvoicesController(IInvoiceRepository invoiceRepository, ICustomerRepository customerRepository)
         {
-            _context = context;
             _invoiceRepository = invoiceRepository;
             _customerRepository = customerRepository;
         }
@@ -82,7 +79,6 @@ namespace HueFestivalTicket.Controllers
 
         /*
         // PUT: api/Invoices/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutInvoice(Guid id, InvoiceDTO invoice)
         {
@@ -102,7 +98,6 @@ namespace HueFestivalTicket.Controllers
         }
 
         // POST: api/Invoices
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<Invoice>> PostInvoice(InvoiceDTO invoice)
         {
@@ -132,11 +127,6 @@ namespace HueFestivalTicket.Controllers
             {
                 Message = "Delete Success"
             }); ;
-        }
-
-        private bool InvoiceExists(Guid id)
-        {
-            return (_context.Invoices?.Any(e => e.IdInvoice == id)).GetValueOrDefault();
         }
         */
     }

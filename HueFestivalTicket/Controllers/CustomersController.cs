@@ -1,5 +1,4 @@
-﻿using HueFestivalTicket.Contexts;
-using HueFestivalTicket.Data;
+﻿using HueFestivalTicket.Data;
 using HueFestivalTicket.Models;
 using HueFestivalTicket.Repositories.IRepositories;
 using Microsoft.AspNetCore.Authorization;
@@ -12,12 +11,10 @@ namespace HueFestivalTicket.Controllers
     [Authorize(Policy = "ManagerOrStaff")]
     public class CustomersController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
         private readonly ICustomerRepository _customerRepository;
 
-        public CustomersController(ApplicationDbContext context, ICustomerRepository customerRepository)
+        public CustomersController(ICustomerRepository customerRepository)
         {
-            _context = context;
             _customerRepository = customerRepository;
         }
 
@@ -54,7 +51,6 @@ namespace HueFestivalTicket.Controllers
         }
 
         // PUT: api/Customers/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         public async Task<IActionResult> PutCustomer(Guid id, CustomerDTO customer)
         {
@@ -99,7 +95,6 @@ namespace HueFestivalTicket.Controllers
         }
 
         // POST: api/Customers
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<Customer>> PostCustomer(CustomerDTO customer)
         {

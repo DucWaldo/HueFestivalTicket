@@ -1,5 +1,4 @@
-﻿using HueFestivalTicket.Contexts;
-using HueFestivalTicket.Data;
+﻿using HueFestivalTicket.Data;
 using HueFestivalTicket.Models;
 using HueFestivalTicket.Repositories.IRepositories;
 using Microsoft.AspNetCore.Authorization;
@@ -13,13 +12,12 @@ namespace HueFestivalTicket.Controllers
     [Authorize(Policy = "ManagerOrStaff")]
     public class CheckinsController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
         private readonly ICheckinRepository _checkinRepository;
         private readonly ITicketRepository _ticketRepository;
 
-        public CheckinsController(ApplicationDbContext context, ICheckinRepository checkinRepository, ITicketRepository ticketRepository)
+        public CheckinsController(ICheckinRepository checkinRepository,
+            ITicketRepository ticketRepository)
         {
-            _context = context;
             _checkinRepository = checkinRepository;
             _ticketRepository = ticketRepository;
         }
@@ -56,40 +54,7 @@ namespace HueFestivalTicket.Controllers
             return checkin;
         }
 
-        /*
-        // PUT: api/Checkins/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutCheckin(Guid id, Checkin checkin)
-        {
-            if (id != checkin.IdCheckin)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(checkin).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!CheckinExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }*/
-
         // POST: api/Checkins
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         public async Task<ActionResult<Checkin>> PostCheckin([FromForm] CheckinDTO checkin)
         {
@@ -142,25 +107,28 @@ namespace HueFestivalTicket.Controllers
             });
         }
 
+
         // DELETE: api/Checkins/5
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCheckin(Guid id)
         {
-            if (_context.Checkins == null)
-            {
-                return NotFound();
-            }
-            var checkin = await _context.Checkins.FindAsync(id);
+            var checkin = await _checkinRepository.GetCheckinByIdAsync(id);
             if (checkin == null)
             {
-                return NotFound();
+                return Ok(new
+                {
+                    Message = "This checkin doesn't exist"
+                });
             }
 
-            _context.Checkins.Remove(checkin);
-            await _context.SaveChangesAsync();
+            await _checkinRepository.DeleteCheckinAsync(checkin);
 
-            return NoContent();
+            return Ok(new
+            {
+                Message = "Delete Success"
+            });
         }
+
 
         private bool CheckTicket(Ticket ticket, string qrCodeContent)
         {

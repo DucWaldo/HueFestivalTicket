@@ -1,5 +1,4 @@
-﻿using HueFestivalTicket.Contexts;
-using HueFestivalTicket.Data;
+﻿using HueFestivalTicket.Data;
 using HueFestivalTicket.Models;
 using HueFestivalTicket.Repositories.IRepositories;
 using Microsoft.AspNetCore.Authorization;
@@ -11,13 +10,11 @@ namespace HueFestivalTicket.Controllers
     [ApiController]
     public class TypeLocationsController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
         private readonly ITypeLocationRepository _typeLocationRepository;
         private readonly IWebHostEnvironment _environment;
 
-        public TypeLocationsController(ApplicationDbContext context, ITypeLocationRepository typeLocationRepository, IWebHostEnvironment environment)
+        public TypeLocationsController(ITypeLocationRepository typeLocationRepository, IWebHostEnvironment environment)
         {
-            _context = context;
             _typeLocationRepository = typeLocationRepository;
             _environment = environment;
         }
@@ -54,7 +51,6 @@ namespace HueFestivalTicket.Controllers
         }
 
         // PUT: api/TypeLocations/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
         [Authorize(Policy = "ManagerPolicy")]
         public async Task<IActionResult> PutTypeLocation(Guid id, [FromForm] TypeLocationDTO typeLocation)
@@ -90,7 +86,6 @@ namespace HueFestivalTicket.Controllers
         }
 
         // POST: api/TypeLocations
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         [Authorize(Policy = "ManagerPolicy")]
         public async Task<ActionResult<TypeLocation>> PostTypeLocation([FromForm] TypeLocationDTO typeLocation)
